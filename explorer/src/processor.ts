@@ -1,16 +1,16 @@
-import { BLACKLIST_CONFIG, getChainConfig } from './config'
-import { TypeormDatabase } from '@subsquid/typeorm-store'
-import { Block as BlockEntity, Call, Event, Extrinsic } from './model'
+import { getChainConfig } from './config'
 import {
+  BatchContext,
   BatchProcessorCallItem,
-  SubstrateBatchProcessor
-} from '@subsquid/substrate-processor'
-import { getParsedArgs, ItemsLogger } from './utils/common'
+  BatchProcessorEventItem,
+  BatchProcessorItem,
+  SubstrateBatchProcessor,
+} from '@subsquid/substrate-processor';
+import {Store} from '@subsquid/typeorm-store'
 
 const CHAIN_CONFIG = getChainConfig()
 
 export const processor = new SubstrateBatchProcessor()
-  //.setBlockRange(CHAIN_CONFIG.blockRange ?? { from: 1_000_000 })
   .setDataSource(CHAIN_CONFIG.dataSource)
   .addEvent('*', {
     data: {
@@ -33,3 +33,6 @@ export const processor = new SubstrateBatchProcessor()
   .includeAllBlocks()
 
 export type CallItem = BatchProcessorCallItem<typeof processor>
+type Item = BatchProcessorItem<typeof processor>
+type EventItem = BatchProcessorEventItem<typeof processor>
+type Context = BatchContext<Store, Item>

@@ -1,5 +1,5 @@
-module.exports = class Data1693454585511 {
-    name = 'Data1693454585511'
+module.exports = class Data1693459037615 {
+    name = 'Data1693459037615'
 
     async up(db) {
         await db.query(`CREATE TABLE "call" ("id" character varying NOT NULL, "parent_id" text, "extrinsic_hash" text, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "call_name" text NOT NULL, "pallet_name" text NOT NULL, "success" boolean NOT NULL, "caller_public_key" text, "args_str" text array, "block_id" character varying, "extrinsic_id" character varying, CONSTRAINT "PK_2098af0169792a34f9cfdd39c47" PRIMARY KEY ("id"))`)
@@ -43,6 +43,10 @@ module.exports = class Data1693454585511 {
         await db.query(`CREATE INDEX "IDX_68d2eadecb3eeb540d2004acef" ON "items_counter" ("type") `)
         await db.query(`CREATE INDEX "IDX_1d9be1d79f197d42dd163f86c8" ON "items_counter" ("level") `)
         await db.query(`CREATE INDEX "IDX_e03dd1c60ac7622914f72ac2f1" ON "items_counter" ("total") `)
+        await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "free" numeric NOT NULL, "reserved" numeric NOT NULL, "total" numeric NOT NULL, "updated_at" integer, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "chain_state" ("id" character varying NOT NULL, "token_balance" numeric NOT NULL, "token_holders" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "block_number" integer NOT NULL, CONSTRAINT "PK_e28e46a238ada7cbbcf711b3f6c" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_b15977afb801d90143ea51cdec" ON "chain_state" ("timestamp") `)
+        await db.query(`CREATE INDEX "IDX_5596acea2cba293bbdc32b577c" ON "chain_state" ("block_number") `)
         await db.query(`ALTER TABLE "call" ADD CONSTRAINT "FK_bd3f11fd4110d60ac8b96cd62f3" FOREIGN KEY ("block_id") REFERENCES "block"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "call" ADD CONSTRAINT "FK_dde30e4f2c6a80f9236bfdf2590" FOREIGN KEY ("extrinsic_id") REFERENCES "extrinsic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "event" ADD CONSTRAINT "FK_2b0d35d675c4f99751855c45021" FOREIGN KEY ("block_id") REFERENCES "block"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -94,6 +98,10 @@ module.exports = class Data1693454585511 {
         await db.query(`DROP INDEX "public"."IDX_68d2eadecb3eeb540d2004acef"`)
         await db.query(`DROP INDEX "public"."IDX_1d9be1d79f197d42dd163f86c8"`)
         await db.query(`DROP INDEX "public"."IDX_e03dd1c60ac7622914f72ac2f1"`)
+        await db.query(`DROP TABLE "account"`)
+        await db.query(`DROP TABLE "chain_state"`)
+        await db.query(`DROP INDEX "public"."IDX_b15977afb801d90143ea51cdec"`)
+        await db.query(`DROP INDEX "public"."IDX_5596acea2cba293bbdc32b577c"`)
         await db.query(`ALTER TABLE "call" DROP CONSTRAINT "FK_bd3f11fd4110d60ac8b96cd62f3"`)
         await db.query(`ALTER TABLE "call" DROP CONSTRAINT "FK_dde30e4f2c6a80f9236bfdf2590"`)
         await db.query(`ALTER TABLE "event" DROP CONSTRAINT "FK_2b0d35d675c4f99751855c45021"`)

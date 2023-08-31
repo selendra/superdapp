@@ -133,3 +133,5 @@ dist
 /node_modules
 /lib
 /*Versions.jsonl
+
+local
