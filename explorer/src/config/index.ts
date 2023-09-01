@@ -1,6 +1,7 @@
-import type { ProcessorConfig } from './processorConfig'
+import type { ProcessorConfig } from './interfaces/processorConfig'
+import {ChainApi} from './interfaces/chainApi'
+
 import fs from 'fs'
-import { assertNotNull } from '@subsquid/substrate-processor'
 
 export const BLACKLIST_CONFIG: IBlackListConfing = getJSON(
   'assets/blacklist-config.json'
@@ -17,10 +18,10 @@ function getJSON(filename: string) {
   return JSON.parse(data)
 }
 
-export function getChainConfig(): ProcessorConfig {
+export function getChainConfig(): {config: ProcessorConfig, api: ChainApi} {
   switch (process.env.CHAIN) {
     case 'selendra':
-      return require('./chains/selendra').default
+      return require('./chains/selendra')
     default:
       throw new Error(`Unsupported chain ${process.env.CHAIN}`)
   }

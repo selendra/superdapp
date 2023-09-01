@@ -8,10 +8,11 @@ import {
 } from '@subsquid/substrate-processor';
 import {Store} from '@subsquid/typeorm-store'
 
-const CHAIN_CONFIG = getChainConfig()
+const { config } = getChainConfig()
 
-export const processor = new SubstrateBatchProcessor()
-  .setDataSource(CHAIN_CONFIG.dataSource)
+export const blockProcessor = new SubstrateBatchProcessor()
+  .setDataSource(config.dataSource)
+  .setBlockRange(config.blockRange || {from: 0})
   .addEvent('*', {
     data: {
       event: {
@@ -32,7 +33,43 @@ export const processor = new SubstrateBatchProcessor()
   } as const)
   .includeAllBlocks()
 
-export type CallItem = BatchProcessorCallItem<typeof processor>
-type Item = BatchProcessorItem<typeof processor>
-type EventItem = BatchProcessorEventItem<typeof processor>
-type Context = BatchContext<Store, Item>
+export type CallBlockItem = BatchProcessorCallItem<typeof blockProcessor>
+
+export const accountProcessor = new SubstrateBatchProcessor()
+  .setDataSource(config.dataSource)
+  .setBlockRange(config.blockRange || {from: 0})
+    .addEvent('Balances.Endowed', {
+        data: {event: {args: true}},
+    } as const)
+    .addEvent('Balances.Transfer', {
+        data: {event: {args: true}},
+    } as const)
+    .addEvent('Balances.BalanceSet', {
+        data: {event: {args: true}},
+    } as const)
+    .addEvent('Balances.Reserved', {
+        data: {event: {args: true}},
+    } as const)
+    .addEvent('Balances.Unreserved', {
+        data: {event: {args: true}},
+    } as const)
+    .addEvent('Balances.ReserveRepatriated', {
+        data: {event: {args: true}},
+    } as const)
+    .addEvent('Balances.Deposit', {
+        data: {event: {args: true}},
+    } as const)
+    .addEvent('Balances.Withdraw', {
+        data: {event: {args: true}},
+    } as const)
+    .addEvent('Balances.Slashed', {
+        data: {event: {args: true}},
+    } as const)
+    .addCall('*', {
+        data: {call: {origin: true}},
+    } as const)
+  
+export type AccountItem = BatchProcessorItem<typeof accountProcessor>
+export type CallAccountItem = BatchProcessorCallItem<typeof accountProcessor>
+export type EventAccountItem = BatchProcessorEventItem<typeof accountProcessor>
+export type AccountContext = BatchContext<Store, AccountItem>

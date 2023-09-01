@@ -1,8 +1,7 @@
-import { CallItem } from '../processor';
+import { CallBlockItem as CallItem } from '../processor';
 import { BLACKLIST_CONFIG } from '../config';
 import { Block as BlockEntity, Call, Event, Extrinsic } from '../model';
 import { getParsedArgs, ItemsLogger } from '../utils/common';
-
 
 export async function processBlock(ctx: any){
   const entitiesStore = new Map<
