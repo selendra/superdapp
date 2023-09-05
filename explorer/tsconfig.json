@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2020",
+    "target": "es2021",
     "outDir": "lib",
     "rootDir": "src",
     "strict": true,
@@ -12,8 +12,11 @@
     "emitDecoratorMetadata": true,
     "skipLibCheck": true
   },
-  "include": ["src"],
+  "include": [
+    "src"
+  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/**/!*"
   ]
 }

@@ -1,4 +1,4 @@
-import {UnknownVersionError} from '../../utils/common'
+import {UnknownVersionError} from '../../utils'
 import {ChainApi} from '../interfaces/chainApi'
 import {
     BalancesBalanceSetEvent,
@@ -10,13 +10,13 @@ import {
     BalancesTransferEvent,
     BalancesUnreservedEvent,
     BalancesWithdrawEvent,
-} from '../../types/events'
+} from './types/events'
 import {
     BalancesAccountStorage,
     BalancesTotalIssuanceStorage,
     SystemAccountStorage,
-} from '../../types/storage'
-import {Block, ChainContext, Event} from '../../types/support'
+} from './types/storage'
+import {Block, ChainContext, Event} from './types/support'
 
 export function getBalanceSetAccount(ctx: ChainContext, event: Event) {
     const data = new BalancesBalanceSetEvent(ctx, event)
@@ -25,6 +25,8 @@ export function getBalanceSetAccount(ctx: ChainContext, event: Event) {
         return data.asV1031[0]
     } else if (data.isV9130) {
         return data.asV9130.who
+    } else if (data.isV9420) {
+        return data.asV9420.who
     } else {
         throw new UnknownVersionError(data.constructor.name)
     }

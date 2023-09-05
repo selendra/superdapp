@@ -1,4 +1,4 @@
-import {Block, ChainContext, Event} from '../../types/support'
+import {Block, ChainContext, Event} from '../selendra/types/support'
 
 export type ChainApi = {
     events: {
@@ -20,5 +20,6 @@ export type ChainApi = {
 }
 
 type BalanceData = {free: bigint; reserved: bigint}
+
 type EventGetter<R> = (ctx: ChainContext, event: Event) => R
 type StorageGetter<T extends Array<any>, R> = (ctx: ChainContext, block: Block, ...args: T) => Promise<R>
