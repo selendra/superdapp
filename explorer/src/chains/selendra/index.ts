@@ -1,4 +1,4 @@
 import {api} from './api'
-import {config} from './config'
+import {config, BLACKLIST_CONFIG} from './config'
 
-export {config, api}
+export {config, api, BLACKLIST_CONFIG}

@@ -1,4 +1,4 @@
-import { processor, processBalances } from './process/account'
+import { accountProcessor, processBalances } from './process/account'
 import { TypeormDatabase } from '@subsquid/typeorm-store'
 
-processor.run(new TypeormDatabase(), processBalances)
+accountProcessor.run(new TypeormDatabase(), processBalances)

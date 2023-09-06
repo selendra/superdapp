@@ -1,7 +1,8 @@
 import * as ss58 from '@subsquid/ss58'
 import {decodeHex, toHex} from '@subsquid/substrate-processor'
-const { Keyring } = require('@polkadot/api');
+export * from "./common"
 
+const { Keyring } = require('@polkadot/api');
 const keyring = new Keyring();
 
 export function getOriginAccountId(origin: any) {

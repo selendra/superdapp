@@ -6,3 +6,8 @@ export interface ProcessorConfig {
     dataSource: Parameters<SubstrateProcessor<any>['setDataSource']>[0]
     blockRange?: Parameters<SubstrateProcessor<any>['setBlockRange']>[0]
 }
+
+export interface IBlackListConfing {
+    blacklistItems: string[]
+    argsStringMaxLengthLimit: number
+  }
