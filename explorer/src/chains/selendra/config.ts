@@ -1,5 +1,10 @@
 import {ProcessorConfig, IBlackListConfing } from '../interfaces/processorConfig'
-import { getJSON } from '../../utils'
+import fs from 'fs'
+
+function getJSON(filename: string) {
+  const data = fs.readFileSync(filename).toString()
+  return JSON.parse(data)
+}
 
 export const config: ProcessorConfig = {
   chainName: 'selendra',
