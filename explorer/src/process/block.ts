@@ -1,5 +1,5 @@
 import { Block as BlockEntity, Call, Event, Extrinsic } from '../model';
-import { getParsedArgs, ItemsLogger } from '../utils';
+import { getParsedArgs, ItemsLogger } from '../utils/common';
 import {getChain, BLACKLIST_CONFIG} from '../chains'
 
 import {

@@ -53,7 +53,6 @@ type EventItem = BatchProcessorEventItem<typeof accountProcessor>
 type CallItem = BatchProcessorCallItem<typeof accountProcessor>
 type Context = BatchContext<Store, Item>
 
-const SAVE_PERIOD = 12 * 60 * 60 * 1000
 let lastStateTimestamp: number | undefined
 
 async function getLastChainState(store: Store) {

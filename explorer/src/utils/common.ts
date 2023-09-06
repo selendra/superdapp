@@ -7,13 +7,6 @@ import { CommonHandlerContext } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
 import { CounterLevel, ItemsCounter, ItemType } from '../model'
 
-import fs from 'fs'
-
-export function getJSON(filename: string) {
-  const data = fs.readFileSync(filename).toString()
-  return JSON.parse(data)
-}
-
 interface ICounterNameProps {
   type: ItemType
   level: CounterLevel
