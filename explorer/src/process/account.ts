@@ -14,7 +14,7 @@ import {decodeId, encodeId, getOriginAccountId} from '../utils'
 
 const {api, config} = getChain()
 
-export const processor = new SubstrateBatchProcessor()
+export const accountProcessor = new SubstrateBatchProcessor()
     .setDataSource(config.dataSource)
     .setBlockRange(config.blockRange || {from: 0})
     .addEvent('Balances.Endowed', {
@@ -48,9 +48,9 @@ export const processor = new SubstrateBatchProcessor()
         data: {call: {origin: true}},
     } as const)
 
-type Item = BatchProcessorItem<typeof processor>
-type EventItem = BatchProcessorEventItem<typeof processor>
-type CallItem = BatchProcessorCallItem<typeof processor>
+type Item = BatchProcessorItem<typeof accountProcessor>
+type EventItem = BatchProcessorEventItem<typeof accountProcessor>
+type CallItem = BatchProcessorCallItem<typeof accountProcessor>
 type Context = BatchContext<Store, Item>
 
 const SAVE_PERIOD = 12 * 60 * 60 * 1000

@@ -1,5 +1,6 @@
 import {ChainApi} from './interfaces/chainApi'
 import {ProcessorConfig} from './interfaces/processorConfig'
+export { BLACKLIST_CONFIG } from './selendra'
 
 export function getChain(): {config: ProcessorConfig; api: ChainApi} {
     switch (process.env.CHAIN) {
@@ -9,3 +10,4 @@ export function getChain(): {config: ProcessorConfig; api: ChainApi} {
             throw new Error(`Unsupported chain ${process.env.CHAIN}`)
     }
 }
+

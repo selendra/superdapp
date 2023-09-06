@@ -1,4 +1,5 @@
-import {ProcessorConfig} from '../interfaces/processorConfig'
+import {ProcessorConfig, IBlackListConfing } from '../interfaces/processorConfig'
+import { getJSON } from '../../utils'
 
 export const config: ProcessorConfig = {
   chainName: 'selendra',
@@ -11,3 +12,7 @@ export const config: ProcessorConfig = {
       from: 0,
   },
 }
+
+export const BLACKLIST_CONFIG: IBlackListConfing = getJSON(
+  'assets/blacklist-config.json'
+)
