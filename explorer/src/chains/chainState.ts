@@ -1,14 +1,14 @@
-import {BatchContext, SubstrateBlock} from '@subsquid/substrate-processor'
-import {Store} from '@subsquid/typeorm-store'
-import {getChain} from '.'
-import {Account, ChainState} from '../model'
+import { BatchContext, SubstrateBlock } from '@subsquid/substrate-processor';
+import { Store } from '@subsquid/typeorm-store';
+import { getChain } from '.';
+import { Account, ChainState } from '../model';
 
-const {api} = getChain()
+const { api } = getChain();
 
-const DAY_MS = 24 * 60 * 60 * 1000
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export async function saveChainState(ctx: BatchContext<Store, unknown>, block: SubstrateBlock) {
-    const state = new ChainState({id: block.id})
+    const state = new ChainState({ id: block.id })
 
     state.timestamp = new Date(getDayTimestamp(block.timestamp))
     state.blockNumber = block.height
