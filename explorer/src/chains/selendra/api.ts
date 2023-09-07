@@ -1,5 +1,5 @@
-import {UnknownVersionError} from '../../utils'
-import {ChainApi} from '../interfaces/chainApi'
+import { UnknownVersionError } from '../../utils'
+import { ChainApi } from '../interfaces/chainApi'
 import {
     BalancesBalanceSetEvent,
     BalancesDepositEvent,
@@ -10,13 +10,13 @@ import {
     BalancesTransferEvent,
     BalancesUnreservedEvent,
     BalancesWithdrawEvent,
-} from './types/events'
+} from './types/events';
 import {
     BalancesAccountStorage,
     BalancesTotalIssuanceStorage,
     SystemAccountStorage,
-} from './types/storage'
-import {Block, ChainContext, Event} from './types/support'
+} from './types/storage';
+import { Block, ChainContext, Event } from './types/support';
 
 export function getBalanceSetAccount(ctx: ChainContext, event: Event) {
     const data = new BalancesBalanceSetEvent(ctx, event)
@@ -132,7 +132,7 @@ export function getReserveRepatriatedAccounts(ctx: ChainContext, event: Event): 
 
 export async function getBalancesAccountBalances(ctx: ChainContext, block: Block, accounts: Uint8Array[]) {
     const storage = new BalancesAccountStorage(ctx, block)
-    const mapData = (d: {free: bigint; reserved: bigint}) => ({free: d.free, reserved: d.reserved})
+    const mapData = (d: { free: bigint; reserved: bigint }) => ({ free: d.free, reserved: d.reserved })
 
     if (storage.isV1050) {
         return storage.getManyAsV1050(accounts).then((data) => data.map(mapData))
@@ -147,7 +147,7 @@ export async function getSystemAccountBalances(ctx: ChainContext, block: Block, 
     const storage = new SystemAccountStorage(ctx, block)
     if (!storage.isExists) return undefined
 
-    const mapData = (d: {data: {free: bigint; reserved: bigint}}) => ({free: d.data.free, reserved: d.data.reserved})
+    const mapData = (d: { data: { free: bigint; reserved: bigint } }) => ({ free: d.data.free, reserved: d.data.reserved })
 
     if (storage.isV1050) {
         return storage.getManyAsV1050(accounts).then((data) => data.map(mapData))
@@ -157,7 +157,7 @@ export async function getSystemAccountBalances(ctx: ChainContext, block: Block, 
         return storage.getManyAsV2028(accounts).then((data) => data.map(mapData))
     } else if (storage.isV2030) {
         return storage.getManyAsV2030(accounts).then((data) => data.map(mapData))
-    }  else if (storage.isV9420) {
+    } else if (storage.isV9420) {
         return storage.getManyAsV9420(accounts).then((data) => data.map(mapData))
     } else {
         throw new UnknownVersionError(storage.constructor.name)

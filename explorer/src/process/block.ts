@@ -1,40 +1,9 @@
 import { Block as BlockEntity, Call, Event, Extrinsic } from '../model';
 import { getParsedArgs, ItemsLogger } from '../utils/common';
-import {getChain, BLACKLIST_CONFIG} from '../chains'
+import { BLACKLIST_CONFIG, BALANCE_CONFIG } from '../chains';
+import { CallItem } from '.';
 
-import {
-  BatchProcessorCallItem,
-  SubstrateBatchProcessor,
-} from '@subsquid/substrate-processor';
-
-const {config} = getChain()
-
-export const blockProcessor = new SubstrateBatchProcessor()
-  .setDataSource(config.dataSource)
-  .setBlockRange(config.blockRange || {from: 0})
-  .addEvent('*', {
-    data: {
-      event: {
-        extrinsic: true,
-        indexInBlock: true,
-        args: true
-      }
-    }
-  } as const)
-  .addCall('*', {
-    data: {
-      call: {
-        parent: true,
-        args: true
-      },
-      extrinsic: true
-    }
-  } as const)
-  .includeAllBlocks()
-
-export type CallItem = BatchProcessorCallItem<typeof blockProcessor>
-
-export async function processBlock(ctx: any){
+export async function processBlock(ctx: any) {
   const entitiesStore = new Map<
     'block' | 'event' | 'call' | 'extrinsic',
     Map<string, BlockEntity | Event | Call | Extrinsic>
@@ -169,6 +138,7 @@ export async function processBlock(ctx: any){
       }
     }
   }
+
   await ItemsLogger.saveToDB({ block: ctx.blocks[0] as any, ...ctx })
   const blocks = entitiesStore.get('block')
   if (blocks && blocks.size > 0) await ctx.store.insert([...blocks.values()])

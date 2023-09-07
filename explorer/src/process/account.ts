@@ -1,57 +1,16 @@
 import {
     BatchContext,
-    BatchProcessorCallItem,
-    BatchProcessorEventItem,
-    BatchProcessorItem,
-    SubstrateBatchProcessor,
     SubstrateBlock,
 } from '@subsquid/substrate-processor'
-import {Store, TypeormDatabase} from '@subsquid/typeorm-store'
-import {getChain} from '../chains'
-import {isOneDay, saveChainState} from '../chains/chainState'
-import {Account, ChainState} from '../model'
-import {decodeId, encodeId, getOriginAccountId} from '../utils'
+import { Store } from '@subsquid/typeorm-store'
+import { getChain } from '../chains'
+import { isOneDay, saveChainState } from '../chains/chainState'
+import { Account, ChainState } from '../model'
+import { decodeId, encodeId, getOriginAccountId } from '../utils'
+import { BALANCE_CONFIG } from '../chains';
+import { CallItem, Context, EventItem } from '.';
 
-const {api, config} = getChain()
-
-export const accountProcessor = new SubstrateBatchProcessor()
-    .setDataSource(config.dataSource)
-    .setBlockRange(config.blockRange || {from: 0})
-    .addEvent('Balances.Endowed', {
-        data: {event: {args: true}},
-    } as const)
-    .addEvent('Balances.Transfer', {
-        data: {event: {args: true}},
-    } as const)
-    .addEvent('Balances.BalanceSet', {
-        data: {event: {args: true}},
-    } as const)
-    .addEvent('Balances.Reserved', {
-        data: {event: {args: true}},
-    } as const)
-    .addEvent('Balances.Unreserved', {
-        data: {event: {args: true}},
-    } as const)
-    .addEvent('Balances.ReserveRepatriated', {
-        data: {event: {args: true}},
-    } as const)
-    .addEvent('Balances.Deposit', {
-        data: {event: {args: true}},
-    } as const)
-    .addEvent('Balances.Withdraw', {
-        data: {event: {args: true}},
-    } as const)
-    .addEvent('Balances.Slashed', {
-        data: {event: {args: true}},
-    } as const)
-    .addCall('*', {
-        data: {call: {origin: true}},
-    } as const)
-
-type Item = BatchProcessorItem<typeof accountProcessor>
-type EventItem = BatchProcessorEventItem<typeof accountProcessor>
-type CallItem = BatchProcessorCallItem<typeof accountProcessor>
-type Context = BatchContext<Store, Item>
+const { api, config } = getChain();
 
 let lastStateTimestamp: number | undefined
 
@@ -96,6 +55,10 @@ export async function processBalances(ctx: Context): Promise<void> {
 }
 
 async function saveAccounts(ctx: Context, block: SubstrateBlock, accountIds: string[]) {
+    if (block.height = 0){
+        
+    }
+
     const balances = await getBalances(ctx, block, accountIds)
     if (!balances) {
         ctx.log.warn('No balances')
@@ -123,7 +86,7 @@ async function saveAccounts(ctx: Context, block: SubstrateBlock, accountIds: str
                 })
             )
         } else {
-            deletions.set(id, new Account({id}))
+            deletions.set(id, new Account({ id }))
         }
     }
 
@@ -136,55 +99,51 @@ function processBalancesCallItem(ctx: Context, item: CallItem) {
     return id ? encodeId(id, config.prefix) : undefined
 }
 
-function processBalancesEventItem(ctx: Context, item: EventItem) {
-    const ids: Uint8Array[] = []
-    switch (item.name) {
-        case 'Balances.BalanceSet': {
-            const account = api.events.getBalanceSetAccount(ctx, item.event)
-            ids.push(account)
-            break
+function processBalancesEventItem(ctx: Context, item: any) {
+    const ids: Uint8Array[] = [];
+    const { name } = item.event
+
+    if (BALANCE_CONFIG.balanceItems.includes(name))
+        try {
+            if (name == "Balances.BalanceSet") {
+                const account = api.events.getBalanceSetAccount(ctx, item.event);
+                ids.push(account);
+            } else if (name == "Balances.BalanceSet") {
+                const account = api.events.getBalanceSetAccount(ctx, item.event);
+                ids.push(account);
+            } else if (name == "Balances.Endowed") {
+                const account = api.events.getEndowedAccount(ctx, item.event)
+                ids.push(account)
+            } else if (name == "Balances.Deposit") {
+                const account = api.events.getDepositAccount(ctx, item.event)
+                ids.push(account)
+            } else if (name == "Balances.Reserved") {
+                const account = api.events.getReservedAccount(ctx, item.event)
+                ids.push(account)
+
+            } else if (name == "Balances.Unreserved") {
+                const account = api.events.getUnreservedAccount(ctx, item.event)
+                ids.push(account)
+
+            } else if (name == "Balances.Withdraw") {
+                const account = api.events.getWithdrawAccount(ctx, item.event)
+                ids.push(account)
+
+            } else if (name == "Balances.Slashed") {
+                const account = api.events.getSlashedAccount(ctx, item.event)
+                ids.push(account)
+
+            } else if (name == "Balances.Transfer") {
+                const accounts = api.events.getTransferAccounts(ctx, item.event)
+                ids.push(...accounts)
+            } else {
+                const accounts = api.events.getReserveRepatriatedAccounts(ctx, item.event)
+                ids.push(...accounts)
+            }
+        } catch (e) {
+            ctx.log.warn('Balnce Event cannot be process.')
+            console.dir(e, { depth: null })
         }
-        case 'Balances.Endowed': {
-            const account = api.events.getEndowedAccount(ctx, item.event)
-            ids.push(account)
-            break
-        }
-        case 'Balances.Deposit': {
-            const account = api.events.getDepositAccount(ctx, item.event)
-            ids.push(account)
-            break
-        }
-        case 'Balances.Reserved': {
-            const account = api.events.getReservedAccount(ctx, item.event)
-            ids.push(account)
-            break
-        }
-        case 'Balances.Unreserved': {
-            const account = api.events.getUnreservedAccount(ctx, item.event)
-            ids.push(account)
-            break
-        }
-        case 'Balances.Withdraw': {
-            const account = api.events.getWithdrawAccount(ctx, item.event)
-            ids.push(account)
-            break
-        }
-        case 'Balances.Slashed': {
-            const account = api.events.getSlashedAccount(ctx, item.event)
-            ids.push(account)
-            break
-        }
-        case 'Balances.Transfer': {
-            const accounts = api.events.getTransferAccounts(ctx, item.event)
-            ids.push(...accounts)
-            break
-        }
-        case 'Balances.ReserveRepatriated': {
-            const accounts = api.events.getReserveRepatriatedAccounts(ctx, item.event)
-            ids.push(...accounts)
-            break
-        }
-    }
     return ids.map((id) => encodeId(id, config.prefix))
 }
 
@@ -204,3 +163,46 @@ async function getBalances(
         (await api.storage.getBalancesAccountBalances(ctx, block, accountIdsU8))
     )
 }
+
+async function saveGenesisAccounts(ctx: Context, block: SubstrateBlock, accountIds: string[]) {
+
+    const balances = await getBalances(ctx, block, accountIds)
+    if (!balances) {
+        ctx.log.warn('No balances')
+        return
+    }
+
+    const accounts = new Map<string, Account>()
+    const deletions = new Map<string, Account>()
+
+    for (let i = 0; i < accountIds.length; i++) {
+        const id = accountIds[i]
+        const balance = balances[i]
+
+        if (!balance) continue
+        const total = balance.free + balance.reserved
+        if (total > 0n) {
+            accounts.set(
+                id,
+                new Account({
+                    id,
+                    free: balance.free,
+                    reserved: balance.reserved,
+                    total,
+                    updatedAt: block.height,
+                })
+            )
+        } else {
+            deletions.set(id, new Account({ id }))
+        }
+    }
+
+    await ctx.store.save([...accounts.values()])
+    ctx.log.child('accounts').info(`updated: ${accounts.size}`)
+}
+
+const getAccountIdFromArgs = (account: any[]): string[] =>
+    account.map(({ args }) => args).map(([e]) => e.toHuman());
+
+const fetchAccountIds = async (api: any): Promise<any[]> =>
+    getAccountIdFromArgs(await api.query.system.account.keys());
