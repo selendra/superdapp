@@ -1,5 +1,3 @@
-import { SubstrateExtrinsicSignature } from '@subsquid/substrate-processor/lib/interfaces/substrate'
-
 export enum ChainDataName {
   BLOCK = 'BLOCK',
   EVENT = 'EVENT',

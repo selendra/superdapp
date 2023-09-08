@@ -1,5 +1,5 @@
-import * as ss58 from '@subsquid/ss58'
-import {decodeHex, toHex} from '@subsquid/substrate-processor'
+import { decodeHex, toHex, SubstrateBlock } from '@subsquid/substrate-processor'
+export * from "./common"
 
 const { Keyring } = require('@polkadot/api');
 const keyring = new Keyring();
@@ -17,16 +17,33 @@ export function getOriginAccountId(origin: any) {
     }
 }
 
+export function processItem<I>(
+  blocks: any,
+  fn: (block: SubstrateBlock, item: I) => void
+) {
+  for (let block of blocks) {
+    for (let item of block.items) {
+      fn(block.header, item)
+    }
+  }
+}
+
 export function encodeId(id: Uint8Array, prefix: string | number | undefined) {
-    return prefix != null ? keyring.encodeAddress(id, prefix) : toHex(id) 
+    return prefix != null ? keyring.encodeAddress(id, prefix) : toHex(id)
 }
 
 export function decodeId(id: string, prefix: string | number | undefined) {
-   return prefix != null ? keyring.decodeAddress(id) : decodeHex(id)
+    return prefix != null ? keyring.decodeAddress(id) : decodeHex(id)
 }
 
 export class UnknownVersionError extends Error {
     constructor(name: string) {
         super(`There is no relevant version for ${name}`)
+    }
+}
+
+export class DataNotDecodableError extends Error {
+    constructor(name: string, data: any) {
+        super(`Can't decode ${data} of ${name}`)
     }
 }

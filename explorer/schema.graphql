@@ -92,6 +92,10 @@ type Account @entity {
   reserved: BigInt!
   total: BigInt!
   updatedAt: Int
+  transfers: [Transfer!] @derivedFrom(field: "account")
+  rewards: [StakingReward!] @derivedFrom(field: "account")
+  identity: Identity @derivedFrom(field: "account")
+  sub: IdentitySub @derivedFrom(field: "account")
 }
 
 type ChainState @entity {
@@ -100,4 +104,84 @@ type ChainState @entity {
   tokenHolders: Int!
   timestamp: DateTime! @index
   blockNumber: Int! @index
+}
+
+###-------------------------Staking Reward--------------------------###
+
+type StakingReward @entity {
+    id: ID!
+    timestamp: DateTime!
+    blockNumber: Int! @index
+    extrinsicHash: String @index
+    account: Account!
+    amount: BigInt!
+    era: Int
+    validatorId: ID
+}
+
+###-------------------------Transfer--------------------------###
+
+enum TransferDirection {
+    From
+    To
+}
+
+# entity for linking account and transfer
+type Transfer @entity {
+    id: ID!
+    transfer: NativeTransfer
+    account: Account!
+    direction: TransferDirection
+}
+
+type NativeTransfer @entity {
+    id: ID!
+    blockNumber: Int! @index
+    timestamp: DateTime! @index
+    extrinsicHash: String @index
+    from: Account!
+    to: Account!
+    amount: BigInt! @index
+    success: Boolean!
+}
+
+###-------------------------Identity--------------------------###
+
+type IdentityAdditionalField {
+    name: String
+    value: String
+}
+
+enum Judgement {
+    Unknown
+    FeePaid
+    Reasonable
+    KnownGood
+    OutOfDate
+    LowQuality
+    Erroneous
+}
+
+type Identity @entity {
+    id: ID!
+    account: Account! @unique
+    judgement: Judgement!
+    subs: [IdentitySub!] @derivedFrom(field: "super")
+    additional: [IdentityAdditionalField!]
+    display: String
+    legal: String
+    web: String
+    riot: String
+    email: String
+    pgpFingerprint: String
+    image: String
+    twitter: String
+    isKilled: Boolean!
+}
+
+type IdentitySub @entity {
+    id: ID!
+    super: Identity
+    account: Account! @unique
+    name: String
 }
