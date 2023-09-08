@@ -1,28 +1,28 @@
 import type {Result} from './support'
 
-export type LookupSource = LookupSource_Id | LookupSource_Index | LookupSource_Raw | LookupSource_Address32 | LookupSource_Address20
+export type MultiAddress = MultiAddress_Id | MultiAddress_Index | MultiAddress_Raw | MultiAddress_Address32 | MultiAddress_Address20
 
-export interface LookupSource_Id {
+export interface MultiAddress_Id {
   __kind: 'Id'
   value: Uint8Array
 }
 
-export interface LookupSource_Index {
+export interface MultiAddress_Index {
   __kind: 'Index'
-  value: number
+  value: null
 }
 
-export interface LookupSource_Raw {
+export interface MultiAddress_Raw {
   __kind: 'Raw'
   value: Uint8Array
 }
 
-export interface LookupSource_Address32 {
+export interface MultiAddress_Address32 {
   __kind: 'Address32'
   value: Uint8Array
 }
 
-export interface LookupSource_Address20 {
+export interface MultiAddress_Address20 {
   __kind: 'Address20'
   value: Uint8Array
 }
@@ -31,7 +31,6 @@ export type Data = Data_None | Data_Raw0 | Data_Raw1 | Data_Raw2 | Data_Raw3 | D
 
 export interface Data_None {
   __kind: 'None'
-  value: null
 }
 
 export interface Data_Raw0 {
@@ -219,53 +218,45 @@ export interface Data_ShaThree256 {
   value: Uint8Array
 }
 
-export type IdentityJudgement = IdentityJudgement_Unknown | IdentityJudgement_FeePaid | IdentityJudgement_Reasonable | IdentityJudgement_KnownGood | IdentityJudgement_OutOfDate | IdentityJudgement_LowQuality | IdentityJudgement_Erroneous
+export type Judgement = Judgement_Unknown | Judgement_FeePaid | Judgement_Reasonable | Judgement_KnownGood | Judgement_OutOfDate | Judgement_LowQuality | Judgement_Erroneous
 
-export interface IdentityJudgement_Unknown {
+export interface Judgement_Unknown {
   __kind: 'Unknown'
-  value: null
 }
 
-export interface IdentityJudgement_FeePaid {
+export interface Judgement_FeePaid {
   __kind: 'FeePaid'
   value: bigint
 }
 
-export interface IdentityJudgement_Reasonable {
+export interface Judgement_Reasonable {
   __kind: 'Reasonable'
-  value: null
 }
 
-export interface IdentityJudgement_KnownGood {
+export interface Judgement_KnownGood {
   __kind: 'KnownGood'
-  value: null
 }
 
-export interface IdentityJudgement_OutOfDate {
+export interface Judgement_OutOfDate {
   __kind: 'OutOfDate'
-  value: null
 }
 
-export interface IdentityJudgement_LowQuality {
+export interface Judgement_LowQuality {
   __kind: 'LowQuality'
-  value: null
 }
 
-export interface IdentityJudgement_Erroneous {
+export interface Judgement_Erroneous {
   __kind: 'Erroneous'
-  value: null
 }
 
-export interface AccountInfo {
-  nonce: number
-  consumers: number
-  providers: number
-  data: AccountData
-}
-
-export interface AccountData {
-  free: bigint
-  reserved: bigint
-  miscFrozen: bigint
-  feeFrozen: bigint
+export interface IdentityInfo {
+  additional: [Data, Data][]
+  display: Data
+  legal: Data
+  web: Data
+  riot: Data
+  email: Data
+  pgpFingerprint: (Uint8Array | undefined)
+  image: Data
+  twitter: Data
 }

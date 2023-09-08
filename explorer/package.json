@@ -13,21 +13,22 @@
     "query-node:start": "squid-graphql-server --subscriptions --max-response-size 10000 --dumb-cache in-memory --dumb-cache-ttl 1000 --dumb-cache-size 100 --dumb-cache-max-age 1000"
   },
   "dependencies": {
-    "@subsquid/processor-tools": "github:subsquid/typeorm-cache-store",
+    "@belopash/squid-tools": "^0.4.0",
+    "@polkadot/api": "^10.9.1",
     "@subsquid/archive-registry": "^3.1.0",
     "@subsquid/graphql-server": "^3.3.2",
+    "@subsquid/processor-tools": "github:subsquid/typeorm-cache-store",
     "@subsquid/ss58": "^0.1.4",
     "@subsquid/substrate-processor": "^2.4.1",
     "@subsquid/typeorm-migration": "^0.1.6",
     "@subsquid/typeorm-store": "^0.2.2",
-    "@polkadot/api": "^10.9.1",
     "concurrently": "^7.5.0",
-    "node-ipc": "^11.1.0",
-    "uuid": "^9.0.0",
     "dotenv": "^16.0.0",
+    "node-ipc": "^11.1.0",
     "pg": "8.9.0",
+    "type-graphql": "^1.1.1",
     "typeorm": "^0.3.17",
-    "type-graphql": "^1.1.1"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@subsquid/substrate-metadata-explorer": "1.0.8",

@@ -1,6 +1,6 @@
 import { Block as BlockEntity, Call, Event, Extrinsic } from '../model';
-import { getParsedArgs, ItemsLogger } from '../utils/common';
-import { BLACKLIST_CONFIG, BALANCE_CONFIG } from '../chains';
+import { getParsedArgs, ItemsLogger } from '../utils';
+import { BLACKLIST_CONFIG } from '../chains';
 import { CallItem } from '.';
 
 export async function processBlock(ctx: any) {
