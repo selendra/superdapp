@@ -12,7 +12,6 @@ export interface IBlackListConfing {
   argsStringMaxLengthLimit: number
 }
 
-
 export interface IBalanceConfing {
   balanceItems: string[]
 }
