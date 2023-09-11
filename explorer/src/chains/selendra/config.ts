@@ -1,4 +1,8 @@
-import { ProcessorConfig, IBlackListConfing, IBalanceConfing } from '../interfaces/processorConfig'
+import {
+  ProcessorConfig,
+  IBlackListConfing,
+  IBalanceConfing
+} from '../interfaces/processorConfig'
 import fs from 'fs'
 
 function getJSON(filename: string) {
@@ -14,8 +18,8 @@ export const config: ProcessorConfig = {
     chain: 'wss://rpc1.selendra.org'
   },
   blockRange: {
-    from: 0,
-  },
+    from: 0
+  }
 }
 
 export const BLACKLIST_CONFIG: IBlackListConfing = getJSON(

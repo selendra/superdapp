@@ -56,8 +56,7 @@ export class ItemsLogger {
     isMainInExtrinsic: boolean
   ) {
     this._addItem({ type: ItemType.Calls, ...item })
-    if (isMainInExtrinsic)
-      this._addItem({ type: ItemType.Extrinsics, ...item })
+    if (isMainInExtrinsic) this._addItem({ type: ItemType.Extrinsics, ...item })
   }
 
   static async saveToDB(ctx: CommonHandlerContext<Store>) {

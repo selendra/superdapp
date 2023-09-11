@@ -1,15 +1,14 @@
-
 import { getChain } from '../chains'
 import {
   BatchContext,
   BatchProcessorCallItem,
   BatchProcessorEventItem,
   BatchProcessorItem,
-  SubstrateBatchProcessor,
+  SubstrateBatchProcessor
 } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
-export { processBlock } from "./block"
-export { processBalances } from "./account"
+export { processBlock } from './block'
+export { processBalances } from './account/balance'
 
 const { config } = getChain()
 
