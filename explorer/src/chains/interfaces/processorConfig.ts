@@ -15,3 +15,8 @@ export interface IBlackListConfing {
 export interface IBalanceConfing {
   balanceItems: string[]
 }
+
+export interface IAccountConfing {
+  accountItems: string[]
+}
+

@@ -29,15 +29,15 @@ export function getBalanceSetAccount(ctx: ChainContext, event: Event) {
 export function getTransferAccounts(
   ctx: ChainContext,
   event: Event
-): [Uint8Array, Uint8Array] {
+): [Uint8Array, Uint8Array, bigint] {
   const data = new BalancesTransferEvent(ctx, event)
 
   if (data.isV1020) {
-    return [data.asV1020[0], data.asV1020[1]]
+    return [data.asV1020[0], data.asV1020[1], data.asV1020[3]]
   } else if (data.isV1050) {
-    return [data.asV1050[0], data.asV1050[1]]
+    return [data.asV1050[0], data.asV1050[1], data.asV1020[3]]
   } else if (data.isV9130) {
-    return [data.asV9130.from, data.asV9130.to]
+    return [data.asV9130.from, data.asV9130.to, data.asV9130.amount]
   } else {
     throw new UnknownVersionError(data.constructor.name)
   }
@@ -128,4 +128,21 @@ export function getReserveRepatriatedAccounts(
   } else {
     throw new UnknownVersionError(data.constructor.name)
   }
+}
+
+export const Transfer = {
+  decode(ctx: ChainContext, event: Event) {
+      let e = new BalancesTransferEvent(ctx, event)
+      if (e.isV1020) {
+          let [from, to, amount] = e.asV1020
+          return {from, to, amount}
+      } else if (e.isV1050) {
+          let [from, to, amount] = e.asV1050
+          return {from, to, amount}
+      } else if (e.isV9130) {
+          return e.asV9130
+      } else {
+          throw new UnknownVersionError(e.constructor.name)
+      }
+  },
 }

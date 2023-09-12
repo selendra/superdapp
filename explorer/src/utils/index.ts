@@ -21,9 +21,9 @@ export function getOriginAccountId(origin: any) {
   }
 }
 
-export function processItem<I>(
+export function processItem(
   blocks: any,
-  fn: (block: SubstrateBlock, item: I) => void
+  fn: (block: SubstrateBlock, item: any) => void
 ) {
   for (let block of blocks) {
     for (let item of block.items) {

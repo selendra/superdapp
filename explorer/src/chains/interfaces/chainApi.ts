@@ -3,7 +3,7 @@ import { Block, ChainContext, Event } from '../selendra/types/support'
 export type ChainApi = {
   events: {
     getBalanceSetAccount: EventGetter<Uint8Array>
-    getTransferAccounts: EventGetter<[Uint8Array, Uint8Array]>
+    getTransferAccounts: EventGetter<[Uint8Array, Uint8Array, bigint]>
     getEndowedAccount: EventGetter<Uint8Array>
     getDepositAccount: EventGetter<Uint8Array>
     getReservedAccount: EventGetter<Uint8Array>
@@ -11,10 +11,6 @@ export type ChainApi = {
     getWithdrawAccount: EventGetter<Uint8Array>
     getSlashedAccount: EventGetter<Uint8Array>
     getReserveRepatriatedAccounts: EventGetter<[Uint8Array, Uint8Array]>
-    getIdentityCleared: IDentityEventGetter
-    getIdentityKilled: IDentityEventGetter
-    getIdentitySubRemoved: IDentityEventGetter
-    getIdentitySubRevoked: IDentityEventGetter
   }
   storage: {
     getBalancesAccountBalances: StorageGetter<
@@ -27,12 +23,14 @@ export type ChainApi = {
     >
     getTotalIssuance: StorageGetter<[], bigint | undefined>
   }
+  calls: {
+    payout_stakers: any
+  }
 }
 
 type BalanceData = { free: bigint; reserved: bigint }
 
 type EventGetter<R> = (ctx: ChainContext, event: Event) => R
-type IDentityEventGetter = (ctx: ChainContext, event: Event) => any
 type StorageGetter<T extends Array<any>, R> = (
   ctx: ChainContext,
   block: Block,

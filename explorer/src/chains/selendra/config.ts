@@ -1,7 +1,8 @@
 import {
   ProcessorConfig,
   IBlackListConfing,
-  IBalanceConfing
+  IBalanceConfing,
+  IAccountConfing
 } from '../interfaces/processorConfig'
 import fs from 'fs'
 
@@ -28,4 +29,8 @@ export const BLACKLIST_CONFIG: IBlackListConfing = getJSON(
 
 export const BALANCE_CONFIG: IBalanceConfing = getJSON(
   'assets/balance-config.json'
+)
+
+export const ACCOUNT_CONFIG: IAccountConfing = getJSON(
+  'assets/account-config.json'
 )
