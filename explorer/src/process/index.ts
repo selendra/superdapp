@@ -9,6 +9,7 @@ import {
 import { Store } from '@subsquid/typeorm-store'
 export { processBlock } from './block'
 export { processBalances } from './account/balance'
+export { processAccounts } from './account/account'
 
 const { config } = getChain()
 

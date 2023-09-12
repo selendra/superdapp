@@ -1,10 +1,9 @@
 import { BatchContext, SubstrateBlock } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
-import { getChain } from '../../chains'
+import { getChain, BALANCE_CONFIG } from '../../chains'
 import { isOneDay, saveChainState } from '../../chains/chainState'
 import { Account, ChainState } from '../../model'
 import { decodeId, encodeId, getOriginAccountId } from '../../utils'
-import { BALANCE_CONFIG } from '../../chains'
 import { CallItem, Context } from '..'
 
 const { api, config } = getChain()
@@ -46,7 +45,6 @@ export async function processBalances(ctx: Context): Promise<void> {
       accountIds.clear()
     }
   }
-
   const block = ctx.blocks[ctx.blocks.length - 1]
 
   await saveAccounts(ctx, block.header, [...accountIds])
@@ -129,7 +127,8 @@ function processBalancesEventItem(ctx: Context, item: any) {
         ids.push(account)
       } else if (name == 'Balances.Transfer') {
         const accounts = api.events.getTransferAccounts(ctx, item.event)
-        ids.push(...accounts)
+        ids.push(accounts[0])
+        ids.push(accounts[0])
       } else {
         const accounts = api.events.getReserveRepatriatedAccounts(
           ctx,

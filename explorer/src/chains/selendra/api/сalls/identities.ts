@@ -1,5 +1,4 @@
 import { DataNotDecodableError, UnknownVersionError} from '../../../../utils'
-import {IdentityClearIdentityCall} from '../../types/calls'
 import {
     IdentityAddSubCall,
     IdentityProvideJudgementCall,
@@ -9,22 +8,23 @@ import {
 } from '../../types/calls'
 import {ChainContext, Call} from '../../types/support'
 
-export function callSetidentity(ctx: ChainContext, call: Call) {
-    let e = new IdentitySetIdentityCall(ctx, call)
-    if (e.isV1030) {
-        return {
-            twitter: {
-                __kind: 'None',
-            },
-            ...e.asV1030.info,
+export const set_identity = {
+    decode(ctx: ChainContext, call: Call) {
+        let e = new IdentitySetIdentityCall(ctx, call)
+        if (e.isV1030) {
+            return {
+                twitter: {
+                    __kind: 'None',
+                },
+                ...e.asV1030.info,
+            }
+        } else if (e.isV1032) {
+            return e.asV1032.info
+        } else {
+            throw new UnknownVersionError(e.constructor.name)
         }
-    } else if (e.isV1032) {
-        return e.asV1032.info
-    } else {
-        throw new UnknownVersionError(e.constructor.name)
-    }
+    },
 }
-
 
 export const set_subs = {
     decode(ctx: ChainContext, call: Call) {
@@ -96,17 +96,6 @@ export const rename_sub = {
             const data = e.asV9111
             if (data.sub.__kind !== 'Index') return {...data, sub: data.sub.value}
             else throw new DataNotDecodableError(e.constructor.name, data)
-        } else {
-            throw new UnknownVersionError(e.constructor.name)
-        }
-    },
-}
-
-export const clear_identity = {
-    decode(ctx: ChainContext, call: Call) {
-        let e = new IdentityClearIdentityCall(ctx, call)
-        if (e.isV1030) {
-            return e.asV1030
         } else {
             throw new UnknownVersionError(e.constructor.name)
         }

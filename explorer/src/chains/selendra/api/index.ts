@@ -2,22 +2,27 @@ export * from './events'
 export * from './сalls'
 
 import { ChainApi } from '../../interfaces/chainApi'
-
 import {
   getBalanceSetAccount,
   getDepositAccount,
   getEndowedAccount,
-  getIdentityCleared,
-  getIdentityKilled,
-  getIdentitySubRemoved,
-  getIdentitySubRevoked,
   getReserveRepatriatedAccounts,
   getReservedAccount,
   getSlashedAccount,
   getTransferAccounts,
   getUnreservedAccount,
-  getWithdrawAccount
+  getWithdrawAccount,
+  Transfer,
+  IdentityCleared,
+  IdentityKilled,
+  IdentitySubRemoved,
+  IdentitySubRevoked,
+  Rewarded
 } from './events'
+
+import {
+  payout_stakers,
+} from './сalls'
 import {
   getBalancesAccountBalances,
   getSystemAccountBalances,
@@ -34,15 +39,14 @@ export const api: ChainApi = {
     getUnreservedAccount,
     getWithdrawAccount,
     getSlashedAccount,
-    getReserveRepatriatedAccounts,
-    getIdentityCleared,
-    getIdentityKilled,
-    getIdentitySubRemoved,
-    getIdentitySubRevoked
+    getReserveRepatriatedAccounts
   },
   storage: {
     getBalancesAccountBalances,
     getSystemAccountBalances,
     getTotalIssuance
+  },
+  calls: {
+    payout_stakers
   }
 }

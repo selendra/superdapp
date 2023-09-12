@@ -1,0 +1,17 @@
+{
+    "accountItems": [
+      "Balances.Transfer",
+      "Staking.Reward",
+      "Staking.Rewarded",
+      "Staking.payout_stakers",
+      "Identity.rename_sub",
+      "Identity.set_subs",
+      "Identity.provide_judgement",
+      "Identity.set_identity",
+      "Identity.add_sub",
+      "Identity.clear_identity",
+      "Identity.kill_identity",
+      "Identity.IdentitySubRemoved",
+      "Identity.IdentitySubRevoked"
+    ]
+  }

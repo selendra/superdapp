@@ -16,8 +16,7 @@ export async function saveChainState(
   state.timestamp = new Date(getDayTimestamp(block.timestamp))
   state.blockNumber = block.height
   state.tokenBalance = (await api.storage.getTotalIssuance(ctx, block)) || 0n
-
-  state.tokenHolders = await ctx.store.count(Account)
+  state.tokenHolders = await ctx.store.count(Account) || 0
 
   await ctx.store.save(state)
   ctx.log.child('state').info(`saved at block ${block.height}`)
