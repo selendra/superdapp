@@ -137,3 +137,5 @@ dist
 local
 
 lib
+
+*copy.json

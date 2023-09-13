@@ -1,5 +1,13 @@
 {
     "accountItems": [
-      "Balances.Transfer"
+      "Balances.BalanceSet",
+      "Balances.Endowed",
+      "Balances.Deposit",
+      "Balances.Reserved",
+      "Balances.Unreserved",
+      "Balances.Withdraw",
+      "Balances.Slashed",
+      "Balances.Transfer",
+      "Balances.ReserveRepatriated"
     ]
   }
