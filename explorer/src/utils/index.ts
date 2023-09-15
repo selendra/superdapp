@@ -4,6 +4,11 @@ export * from './common'
 const { Keyring } = require('@polkadot/api')
 const keyring = new Keyring()
 
+export const wait = async (ms: number): Promise<number> =>
+  new Promise((resolve) => {
+    return setTimeout(resolve, ms);
+  });
+
 export function getOriginAccountId(origin: any) {
   if (
     origin &&

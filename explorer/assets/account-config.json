@@ -8,6 +8,9 @@
       "Balances.Withdraw",
       "Balances.Slashed",
       "Balances.Transfer",
-      "Balances.ReserveRepatriated"
+      "Balances.ReserveRepatriated",
+      "Staking.Reward",
+      "Staking.Rewarded",
+      "Staking.payout_stakers"
     ]
   }

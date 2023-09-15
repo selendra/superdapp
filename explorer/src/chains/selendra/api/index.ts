@@ -13,15 +13,15 @@ import {
   getUnreservedAccount,
   getWithdrawAccount,
   Transfer,
-  IdentityCleared,
+  getIdentityCleared,
   IdentityKilled,
   IdentitySubRemoved,
   IdentitySubRevoked,
-  Rewarded
+  getStakingRewarded
 } from './events'
 
 import {
-  payout_stakers,
+  callPayoutStakers,
 } from './сalls'
 import {
   getBalancesAccountBalances,
@@ -39,7 +39,9 @@ export const api: ChainApi = {
     getUnreservedAccount,
     getWithdrawAccount,
     getSlashedAccount,
-    getReserveRepatriatedAccounts
+    getReserveRepatriatedAccounts,
+    getIdentityCleared,
+    getStakingRewarded
   },
   storage: {
     getBalancesAccountBalances,
@@ -47,6 +49,6 @@ export const api: ChainApi = {
     getTotalIssuance
   },
   calls: {
-    payout_stakers
+    callPayoutStakers
   }
 }
