@@ -19,16 +19,12 @@ export const config: ProcessorConfig = {
     chain: 'wss://rpc1.selendra.org'
   },
   blockRange: {
-    from: 0
+    from: 56499
   }
 }
 
 export const BLACKLIST_CONFIG: IBlackListConfing = getJSON(
   'assets/blacklist-config.json'
-)
-
-export const BALANCE_CONFIG: IBalanceConfing = getJSON(
-  'assets/balance-config.json'
 )
 
 export const ACCOUNT_CONFIG: IAccountConfing = getJSON(

@@ -1,7 +1,11 @@
 import { TypeormDatabase } from '@subsquid/typeorm-store'
 import { StoreWithCache } from '@belopash/squid-tools'
 import { encodeId, getOriginAccountId, processItem } from '../../utils'
-import { BatchContext, SubstrateBlock } from '@subsquid/substrate-processor'
+import {
+  BatchContext,
+  SubstrateBlock,
+  SubstrateExtrinsic
+} from '@subsquid/substrate-processor'
 import { getChain, ACCOUNT_CONFIG } from '../../chains'
 import { Account, Identity, Judgement, IdentitySub } from '../../model'
 import { Action, LazyAction } from './action/base'
@@ -53,119 +57,169 @@ async function processAccountItem(
 
   if (ACCOUNT_CONFIG.accountItems.includes(name)) {
     try {
-      if (name == 'Balances.Transfer') {
-        const data = api.events.getTransferAccounts(ctx, item.event)
-        const fromId = encodeId(data[0], config.prefix)
-        const toId = encodeId(data[1], config.prefix)
+      switch (name) {
+        case 'Balances.Transfer': {
+          const data = api.events.getTransferAccounts(ctx, item.event)
+          const fromId = encodeId(data[0], config.prefix)
+          const toId = encodeId(data[1], config.prefix)
 
-        actions.push(
-          new EnsureAccount(block, item.event.extrinsic, {
-            id: fromId,
-            block
-          }),
-          new EnsureAccount(block, item.event.extrinsic, {
-            id: toId,
-            block
-          })
-        )
-      } else if (name == 'Balances.BalanceSet') {
-        const data = api.events.getBalanceSetAccount(ctx, item.event)
-        const fromId = encodeId(data, config.prefix)
+          actions.push(
+            new EnsureAccount(block, item.event.extrinsic, {
+              id: fromId,
+              block
+            }),
+            new EnsureAccount(block, item.event.extrinsic, {
+              id: toId,
+              block
+            }),
+            new TransferAction(block, item.event.extrinsic, {
+              id: item.event.id,
+              fromId,
+              toId,
+              amount: data[2],
+              success: true
+            })
+          )
+          break
+        }
+        case 'Balances.BalanceSet': {
+          const data = api.events.getBalanceSetAccount(ctx, item.event)
+          const fromId = encodeId(data, config.prefix)
 
-        actions.push(
-          new EnsureAccount(block, item.event.extrinsic, {
-            id: fromId,
-            block
-          })
-        )
-      } else if (name == 'Balances.Endowed') {
-        const account = api.events.getEndowedAccount(ctx, item.event)
-        const fromId = encodeId(account, config.prefix)
-
-        actions.push(
-          new EnsureAccount(block, item.event.extrinsic, {
-            id: fromId,
-            block
-          })
-        )
-      } else if (name == 'Balances.Deposit') {
-        const account = api.events.getDepositAccount(ctx, item.event)
-        const fromId = encodeId(account, config.prefix)
-
-        actions.push(
-          new EnsureAccount(block, item.event.extrinsic, {
-            id: fromId,
-            block
-          })
-        )
-      } else if (name == 'Balances.Reserved') {
-        const account = api.events.getReservedAccount(ctx, item.event)
-        const fromId = encodeId(account, config.prefix)
-
-        actions.push(
-          new EnsureAccount(block, item.event.extrinsic, {
-            id: fromId,
-            block
-          })
-        )
-      } else if (name == 'Balances.Unreserved') {
-        const account = api.events.getUnreservedAccount(ctx, item.event)
-        const fromId = encodeId(account, config.prefix)
-
-        actions.push(
-          new EnsureAccount(block, item.event.extrinsic, {
-            id: fromId,
-            block
-          })
-        )
-      } else if (name == 'Balances.Withdraw') {
-        const account = api.events.getWithdrawAccount(ctx, item.event)
-        const fromId = encodeId(account, config.prefix)
-
-        actions.push(
-          new EnsureAccount(block, item.event.extrinsic, {
-            id: fromId,
-            block
-          })
-        )
-      } else if (name == 'Balances.Slashed') {
-        const account = api.events.getSlashedAccount(ctx, item.event)
-        const fromId = encodeId(account, config.prefix)
-
-        actions.push(
-          new EnsureAccount(block, item.event.extrinsic, {
-            id: fromId,
-            block
-          })
-        )
-      } else if ((name = 'Balances.ReserveRepatriated')) {
-        const accounts = api.events.getReserveRepatriatedAccounts(
-          ctx,
-          item.event
-        )
-        for (let i = 0; i < accounts.length; i++) {
-          const fromId = encodeId(accounts[i], config.prefix)
           actions.push(
             new EnsureAccount(block, item.event.extrinsic, {
               id: fromId,
               block
             })
           )
+          break
+        }
+        case 'Balances.Endowed': {
+          const account = api.events.getEndowedAccount(ctx, item.event)
+          const fromId = encodeId(account, config.prefix)
+
+          actions.push(
+            new EnsureAccount(block, item.event.extrinsic, {
+              id: fromId,
+              block
+            })
+          )
+          break
+        }
+        case 'Balances.Deposit': {
+          const account = api.events.getDepositAccount(ctx, item.event)
+          const fromId = encodeId(account, config.prefix)
+
+          actions.push(
+            new EnsureAccount(block, item.event.extrinsic, {
+              id: fromId,
+              block
+            })
+          )
+          break
+        }
+        case 'Balances.Reserved': {
+          const account = api.events.getReservedAccount(ctx, item.event)
+          const fromId = encodeId(account, config.prefix)
+
+          actions.push(
+            new EnsureAccount(block, item.event.extrinsic, {
+              id: fromId,
+              block
+            })
+          )
+          break
+        }
+        case 'Balances.Unreserved': {
+          const account = api.events.getUnreservedAccount(ctx, item.event)
+          const fromId = encodeId(account, config.prefix)
+
+          actions.push(
+            new EnsureAccount(block, item.event.extrinsic, {
+              id: fromId,
+              block
+            })
+          )
+          break
+        }
+        case 'Balances.Withdraw': {
+          const account = api.events.getWithdrawAccount(ctx, item.event)
+          const fromId = encodeId(account, config.prefix)
+
+          actions.push(
+            new EnsureAccount(block, item.event.extrinsic, {
+              id: fromId,
+              block
+            })
+          )
+
+          break
+        }
+        case 'Balances.Slashed': {
+          const account = api.events.getSlashedAccount(ctx, item.event)
+          const fromId = encodeId(account, config.prefix)
+
+          actions.push(
+            new EnsureAccount(block, item.event.extrinsic, {
+              id: fromId,
+              block
+            })
+          )
+
+          break
+        }
+        case 'Balances.ReserveRepatriated': {
+          const accounts = api.events.getReserveRepatriatedAccounts(
+            ctx,
+            item.event
+          )
+          for (let i = 0; i < accounts.length; i++) {
+            const fromId = encodeId(accounts[i], config.prefix)
+            actions.push(
+              new EnsureAccount(block, item.event.extrinsic, {
+                id: fromId,
+                block
+              })
+            )
+          }
+          break
+        }
+        case 'Staking.Reward':
+        case 'Staking.Rewarded': {
+          const e = api.events.getStakingRewarded(ctx, item.event)
+          if (e == null) return // skip some old format rewards
+
+          let accountId = encodeId(e.stash, config.prefix)
+
+          actions.push(
+            new EnsureAccount(block, item.event.extrinsic, {
+                id: accountId,
+                block,
+            }),
+            new RewardAction(block, item.event.extrinsic, {
+                id: item.event.id,
+                accountId,
+                amount: e.amount,
+                block,
+            })
+        )
+
         }
       }
     } catch (error) {
       ctx.log.warn('Account cannot be process.')
       console.dir(error, { depth: null })
     }
-  } else if (item.kind === 'call'){
-    const id = processBalancesCallItem(item)
-    actions.push(
-      new EnsureAccount(block, item.event.extrinsic, {
-        id: id,
-        block
-      })
-    )
   }
+  // else if (item.kind === 'call') {
+  //   const id = processBalancesCallItem(item)
+  //   actions.push(
+  //     new EnsureAccount(block, item.event.extrinsic, {
+  //       id: id,
+  //       block
+  //     })
+  //   )
+  // }
 
   await Action.process(ctx, actions)
 }

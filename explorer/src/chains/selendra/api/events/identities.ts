@@ -7,18 +7,16 @@ import {
 } from '../../types/events'
 import { ChainContext, Event } from '../../types/support'
 
-export const IdentityCleared = {
-  decode(ctx: ChainContext, event: Event) {
-      let e = new IdentityIdentityClearedEvent(ctx, event)
-      if (e.isV1030) {
-          const [who, deposit] = e.asV1030
-          return {who, deposit}
-      } else if (e.isV9130) {
-          return e.asV9130
-      } else {
-          throw new UnknownVersionError(e.constructor.name)
-      }
-  },
+export function getIdentityCleared(ctx: ChainContext, event: Event) {
+  let e = new IdentityIdentityClearedEvent(ctx, event)
+  if (e.isV1030) {
+    const [who, deposit] = e.asV1030
+    return { who, deposit }
+  } else if (e.isV9130) {
+    return e.asV9130
+  } else {
+    throw new UnknownVersionError(e.constructor.name)
+  }
 }
 
 export const IdentityKilled = {
