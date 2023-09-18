@@ -19,7 +19,7 @@ export const config: ProcessorConfig = {
     chain: 'wss://rpc1.selendra.org'
   },
   blockRange: {
-    from: 56499
+    from: 0
   }
 }
 
