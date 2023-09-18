@@ -26,7 +26,12 @@ export type ChainApi = {
     getTotalIssuance: StorageGetter<[], bigint | undefined>
   }
   calls: {
-    callPayoutStakers: CallGetter<{validatorStash: Uint8Array, era: number}>
+    callPayoutStakers: CallGetter<{ validatorStash: Uint8Array; era: number }>
+    callRenameSubIdentity: CallGetter<{ sub: Uint8Array; data: any }>
+    callSetSubIdentity: CallGetter<{ subs: [Uint8Array, any][] }>
+    callProvideJudgementIdentity: CallGetter<{regIndex: number, target: any, judgement: any}>
+    callAddSubIdentity: CallGetter<{ sub: Uint8Array, data: any}>
+    callSetIdentity: any,
   }
 }
 

@@ -17,16 +17,21 @@ import {
   IdentityKilled,
   IdentitySubRemoved,
   IdentitySubRevoked,
-  getStakingRewarded
+  getStakingRewarded,
 } from './events'
 
 import {
   callPayoutStakers,
+  callRenameSubIdentity,
+  callSetSubIdentity,
+  callProvideJudgementIdentity,
+  callSetIdentity,
+  callAddSubIdentity
 } from './сalls'
 import {
   getBalancesAccountBalances,
   getSystemAccountBalances,
-  getTotalIssuance
+  getTotalIssuance,
 } from './storage'
 
 export const api: ChainApi = {
@@ -49,6 +54,11 @@ export const api: ChainApi = {
     getTotalIssuance
   },
   calls: {
-    callPayoutStakers
+    callPayoutStakers,
+    callRenameSubIdentity,
+    callSetSubIdentity,
+    callProvideJudgementIdentity,
+    callAddSubIdentity,
+    callSetIdentity
   }
 }
