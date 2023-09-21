@@ -1,7 +1,7 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import { ChainApi } from './interfaces/chainApi'
 import { ProcessorConfig } from './interfaces/processorConfig'
-export { BLACKLIST_CONFIG, ACCOUNT_CONFIG } from './selendra'
+export * from './selendra'
 
 export function getChain(): { config: ProcessorConfig; api: ChainApi } {
   switch (process.env.CHAIN) {

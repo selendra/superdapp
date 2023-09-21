@@ -1,4 +1,5 @@
 import { Block, ChainContext, Event, Call } from '../selendra/types/support'
+import { IdentityInfo } from '../selendra/types/v9111'
 
 export type ChainApi = {
   events: {
@@ -31,7 +32,7 @@ export type ChainApi = {
     callSetSubIdentity: CallGetter<{ subs: [Uint8Array, any][] }>
     callProvideJudgementIdentity: CallGetter<{regIndex: number, target: any, judgement: any}>
     callAddSubIdentity: CallGetter<{ sub: Uint8Array, data: any}>
-    callSetIdentity: any,
+    callSetIdentity: CallGetter<{ info: IdentityInfo }>,
   }
 }
 

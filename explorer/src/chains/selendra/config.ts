@@ -1,10 +1,22 @@
 import {
   ProcessorConfig,
   IBlackListConfing,
-  IBalanceConfing,
+  IGenesisConfing,
   IAccountConfing
 } from '../interfaces/processorConfig'
 import fs from 'fs'
+
+export const BLACKLIST_CONFIG: IBlackListConfing = getJSON(
+  'assets/blacklist-config.json'
+)
+
+export const ACCOUNT_CONFIG: IAccountConfing = getJSON(
+  'assets/account-config.json'
+)
+
+const SELENDRA_GENESIS_ACCOUNT_CONFIG: IGenesisConfing = getJSON(
+  'assets/selendra-genesis-account.json'
+)
 
 function getJSON(filename: string) {
   const data = fs.readFileSync(filename).toString()
@@ -20,13 +32,6 @@ export const config: ProcessorConfig = {
   },
   blockRange: {
     from: 0
-  }
+  },
+  genesisAccount: SELENDRA_GENESIS_ACCOUNT_CONFIG
 }
-
-export const BLACKLIST_CONFIG: IBlackListConfing = getJSON(
-  'assets/blacklist-config.json'
-)
-
-export const ACCOUNT_CONFIG: IAccountConfing = getJSON(
-  'assets/account-config.json'
-)

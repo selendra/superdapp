@@ -11,6 +11,7 @@
       "Balances.ReserveRepatriated",
       "Staking.Reward",
       "Staking.Rewarded",
-      "Staking.payout_stakers"
+      "Staking.payout_stakers",
+      "Identity.set_identity"
     ]
   }

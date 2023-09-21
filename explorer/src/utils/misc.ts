@@ -1,11 +1,16 @@
+import {
+  decodeHex,
+  toHex,
+  SubstrateBlock,
+  CommonHandlerContext
+} from '@subsquid/substrate-processor'
+import assert from 'assert'
 import { ChainDataName, ParsedEventsDataMap, ParsedChainData } from './types'
 import { BLACKLIST_CONFIG } from '../chains'
 import * as ss58 from '@subsquid/ss58'
-import { decodeHex, toHex } from '@subsquid/util-internal-hex'
-import assert from 'assert'
-import { CommonHandlerContext } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
 import { CounterLevel, ItemsCounter, ItemType } from '../model'
+import { Keyring } from '@polkadot/api'
 
 interface ICounterNameProps {
   type: ItemType
@@ -154,4 +159,76 @@ export function getParsedArgs(srcArgs: any): string[] {
   let result: Set<string> = new Set()
   parseArgsHelper(srcArgs, result)
   return [...result.values()]
+}
+
+
+const keyring = new Keyring()
+
+export const wait = async (ms: number): Promise<number> =>
+  new Promise((resolve) => {
+    return setTimeout(resolve, ms)
+  })
+
+export function getOriginAccountId(origin: any) {
+  if (
+    origin &&
+    origin.__kind === 'system' &&
+    origin.value.__kind === 'Signed'
+  ) {
+    const id = origin.value.value
+    if (id.__kind === 'Id') {
+      return decodeHex(id.value)
+    } else {
+      return decodeHex(id)
+    }
+  } else {
+    return undefined
+  }
+}
+
+export function processItem(
+  blocks: any,
+  fn: (block: SubstrateBlock, item: any) => void
+) {
+  for (let block of blocks) {
+    for (let item of block.items) {
+      fn(block.header, item)
+    }
+  }
+}
+
+export function encodeId(id: Uint8Array | string, prefix: string | number) {
+  return keyring.encodeAddress(id, Number(prefix))
+}
+
+export function decodeId(id: string, prefix: string | number | undefined) {
+  return keyring.decodeAddress(id)
+}
+
+export class UnknownVersionError extends Error {
+  constructor(name: string) {
+    super(`There is no relevant version for ${name}`)
+  }
+}
+
+export class DataNotDecodableError extends Error {
+  constructor(name: string, data: any) {
+    super(`Can't decode ${data} of ${name}`)
+  }
+}
+
+export function unwrapData(data: { __kind: string; value?: Uint8Array }) {
+  switch (data.__kind) {
+    case 'None':
+      return null
+    case 'BlakeTwo256':
+    case 'Sha256':
+    case 'Keccak256':
+    case 'ShaThree256':
+      return Buffer.from(data.value!).toString('hex')
+    default:
+      return Buffer.from(data.value!)
+        .toString('utf-8')
+        .replace(/\u0000/g, '')
+  }
 }
