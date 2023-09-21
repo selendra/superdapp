@@ -1,12 +1,11 @@
-import { toHex } from '@subsquid/substrate-processor'
-import { BatchContext, SubstrateBlock } from '@subsquid/substrate-processor'
+import { SubstrateBlock } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
 import { isOneDay, saveChainState } from '../../../chains/chainState'
 import { getChain } from '../../../chains'
 import { decodeId, encodeId, getOriginAccountId } from '../../../utils'
 import { Account, ChainState } from '../../../model'
 import { Action } from './base'
-import { Context } from '../..'
+import { CallItem, Context } from '../..'
 
 const { api, config } = getChain()
 
@@ -39,8 +38,10 @@ export class EnsureAccount extends Action<AccountData> {
       return
     }
 
-    const balance = balances[0];
-    const total = (balance ? balance.free : BigInt(0) ) + (balance ? balance.reserved : BigInt(0))
+    const balance = balances[0]
+    const total =
+      (balance ? balance.free : BigInt(0)) +
+      (balance ? balance.reserved : BigInt(0))
 
     const account = new Account({
       id: this.data.id,
@@ -52,10 +53,11 @@ export class EnsureAccount extends Action<AccountData> {
 
     if (!isOneDay(lastStateTimestamp, this.data.block.timestamp)) {
       await saveChainState(ctx, this.data.block)
-      lastStateTimestamp =  this.block.timestamp
+      lastStateTimestamp = this.block.timestamp
     }
 
     await ctx.store.save(account)
+    ctx.log.child('accounts').info(`updated: ${account.id}`)
   }
 }
 
@@ -74,4 +76,9 @@ async function getBalances(
     (await api.storage.getSystemAccountBalances(ctx, block, accountIdsU8)) ||
     (await api.storage.getBalancesAccountBalances(ctx, block, accountIdsU8))
   )
+}
+
+export function processBalancesCallItem(item: CallItem) {
+  const id = getOriginAccountId(item.call.origin)
+  return id ? encodeId(id, config.prefix) : undefined
 }

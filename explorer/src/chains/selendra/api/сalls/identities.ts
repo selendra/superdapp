@@ -7,19 +7,24 @@ import {
   IdentitySetSubsCall
 } from '../../types/calls'
 import { ChainContext, Call } from '../../types/support'
+import { IdentityInfo } from '../../types/v9111'
 
-export function callSetIdentity(ctx: ChainContext, call: Call){
+export function callSetIdentity(ctx: ChainContext, call: Call): { info: IdentityInfo }{
     let e = new IdentitySetIdentityCall(ctx, call)
     if (e.isV1030) {
-      return {
+      return { info: {
         twitter: {
-          __kind: 'None'
+          __kind: 'None',
         },
         ...e.asV1030.info
       }
+       
+      }
     } else if (e.isV1032) {
-      return e.asV1032.info
-    } else {
+      return e.asV1032
+    } else if (e.isV9111) {
+      return e.asV9111
+    }else {
       throw new UnknownVersionError(e.constructor.name)
     }
 }
