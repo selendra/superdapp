@@ -7,6 +7,7 @@ import {
 } from '../../../model'
 import { Action } from './base'
 import { Context as ActionContext } from '../..'
+import { IdentityInfo } from '../../../chains/selendra/types/v9111'
 
 export interface RenameIdentitySubData {
   sub: () => Promise<IdentitySub | undefined>
@@ -26,31 +27,34 @@ export class RenameSubAction extends Action<RenameIdentitySubData> {
 }
 
 export interface EnsureIdentityData {
-  identity: () => Promise<Identity | undefined>
   id: string
-  account: () => Promise<Account>
 }
 
 export class EnsureIdentityAction extends Action<EnsureIdentityData> {
   protected async _perform(ctx: ActionContext): Promise<void> {
-    let identity = await this.data.identity()
+    let identity = await ctx.store.findOne(Identity, {
+      where: { id: this.data.id }
+    })
     if (identity != null) return
 
-    const account = await this.data.account()
+    const account = await ctx.store.findOneOrFail(Account, {
+      where: { id: this.data.id }
+    })
 
     identity = new Identity({
       id: this.data.id,
       account,
       isKilled: false,
-      judgement: Judgement.Unknown
+      judgement: Judgement.Unknown,
     })
 
     await ctx.store.insert(identity)
+    ctx.log.child('identity').info('updated account identity')
   }
 }
 
 export interface SetIdentityData {
-  identity: () => Promise<Identity | undefined>
+  id: string
   display: string | null
   email: string | null
   twitter: string | null
@@ -67,9 +71,15 @@ export interface SetIdentityData {
 
 export class SetIdentityAction extends Action<SetIdentityData> {
   protected async _perform(ctx: ActionContext): Promise<void> {
-    let identity = await this.data.identity()
-    if (identity == null) return
+    const identity = await ctx.store.findOneOrFail(Identity, {
+      where: { id: this.data.id }
+    })
 
+    const account = await ctx.store.findOneOrFail(Account, {
+      where: { id: this.data.id }
+    })
+
+    identity.account = account
     identity.display = this.data.display
     identity.email = this.data.email
     identity.twitter = this.data.twitter
@@ -87,19 +97,23 @@ export class SetIdentityAction extends Action<SetIdentityData> {
 }
 
 export interface GiveJudgementData {
-  identity: () => Promise<Identity | undefined>
+  id: string
   judgement: Judgement
 }
 
 export class GiveJudgementAction extends Action<GiveJudgementData> {
   protected async _perform(ctx: ActionContext): Promise<void> {
-    const identity = await this.data.identity()
+    const identity = await ctx.store.findOneOrFail(Identity, {
+      where: { id: this.data.id }
+    })
+    const account = await ctx.store.findOneOrFail(Account, {
+      where: { id: this.data.id }
+    })
 
-    if(identity == null) return
-
+    identity.account = account
     identity.judgement = this.data.judgement
 
-    await ctx.store.upsert(identity)
+    await ctx.store.save(identity)
   }
 }
 
@@ -133,10 +147,10 @@ export interface AddIdentitySubData {
 export class AddIdentitySubAction extends Action<AddIdentitySubData> {
   protected async _perform(ctx: ActionContext): Promise<void> {
     const identity = await this.data.identity()
-    if (identity == null) return
+    if (!identity) return
 
     let sub = await this.data.sub()
-    if (sub == null) return
+    if (!sub) return
 
     sub.super = identity
 
@@ -151,7 +165,7 @@ export interface ClearIdentityData {
 export class ClearIdentityAction extends Action<ClearIdentityData> {
   protected async _perform(ctx: ActionContext): Promise<void> {
     const identity = await this.data.identity()
-    if (identity == null) return
+    if (!identity) return
 
     identity.display = null
     identity.email = null

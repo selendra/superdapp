@@ -1,6 +1,11 @@
 import { SubstrateBlock } from '@subsquid/substrate-processor'
 import { Keyring, WsProvider, ApiPromise } from '@polkadot/api'
-import { encodeId, getOriginAccountId, processItem } from '../../utils'
+import {
+  encodeId,
+  getOriginAccountId,
+  processItem,
+  unwrapData
+} from '../../utils'
 import { getChain, ACCOUNT_CONFIG } from '../../chains'
 import { Account, Identity, Judgement, IdentitySub } from '../../model'
 import { Action, LazyAction } from './action/base'
@@ -210,19 +215,9 @@ async function processAccountItem(
           if (!item.call.success) break
 
           const identitySetData = api.calls.callSetIdentity(ctx, item.call)
-
           const origin = getOriginAccountId(item.call.origin)
           if (origin == null) break
-
           const identityId = encodeId(origin, config.prefix)
-
-          const identity = ctx.store.findOne(Identity, {
-            where: { id: identityId }
-          })
-
-          const account = ctx.store.findOneOrFail(Account, {
-            where: { id: identityId }
-          })
 
           actions.push(
             new EnsureAccount(block, item.extrinsic, {
@@ -230,35 +225,64 @@ async function processAccountItem(
               block
             }),
             new EnsureIdentityAction(block, item.extrinsic, {
-              identity: () => identity,
-              account: () => account,
               id: identityId
+            }),
+            new GiveJudgementAction(block, item.extrinsic, {
+              id: identityId,
+              judgement: Judgement.Unknown
+            }),
+            new SetIdentityAction(block, item.extrinsic, {
+              id: identityId,
+              web: unwrapData(identitySetData.info.web),
+              display: unwrapData(identitySetData.info.display),
+              legal: unwrapData(identitySetData.info.legal),
+              email: unwrapData(identitySetData.info.email),
+              image: unwrapData(identitySetData.info.image),
+              pgpFingerprint: identitySetData.info.pgpFingerprint
+                ? toHex(identitySetData.info.pgpFingerprint)
+                : null,
+              riot: unwrapData(identitySetData.info.riot),
+              twitter: unwrapData(identitySetData.info.twitter),
+              additional: identitySetData.info.additional.map((a: any) => ({
+                name: unwrapData(a[0])!,
+                value: unwrapData(a[1])
+              }))
             })
-            //   new GiveJudgementAction(block, item.extrinsic, {
-            //     identity: () => identity,
-            //     judgement: Judgement.Unknown
-            //   }),
-            //   new SetIdentityAction(block, item.extrinsic, {
-            //     identity: () => identity,
-            //     web: unwrapData(identitySetData.),
-            //     display: unwrapData(identitySetData.display),
-            //     legal: unwrapData(identitySetData.legal),
-            //     email: unwrapData(identitySetData.email),
-            //     image: unwrapData(identitySetData.image),
-            //     pgpFingerprint: identitySetData.pgpFingerprint
-            //       ? toHex(identitySetData.pgpFingerprint)
-            //       : null,
-            //     riot: unwrapData(identitySetData.riot),
-            //     twitter: unwrapData(identitySetData.twitter),
-            //     additional: identitySetData.additional.map((a: any) => ({
-            //       name: unwrapData(a[0])!,
-            //       value: unwrapData(a[1])
-            //     }))
-            //   })
+          )
+          break
+        }  case 'Identity.provide_judgement': {
+          if (!item.call.success) break
+
+          const judgementGivenData = api.calls.callProvideJudgementIdentity(ctx, item.call)
+
+          const identityId = encodeId(judgementGivenData.target, config.prefix)
+
+          const getJudgment = () => {
+              const kind = judgementGivenData.judgement.__kind
+              switch (kind) {
+                  case Judgement.Erroneous:
+                  case Judgement.FeePaid:
+                  case Judgement.KnownGood:
+                  case Judgement.LowQuality:
+                  case Judgement.OutOfDate:
+                  case Judgement.Reasonable:
+                  case Judgement.Unknown:
+                      return kind as Judgement
+                  default:
+                      throw new Error(`Unknown judgement: ${kind}`)
+              }
+          }
+          const judgement = getJudgment()
+
+          actions.push(
+              new GiveJudgementAction(block, item.extrinsic, {
+                  id: identityId,
+                  judgement,
+              })
           )
 
           break
-        }
+      }
       }
     } catch (error) {
       ctx.log.warn('Account cannot be process.')
@@ -266,7 +290,7 @@ async function processAccountItem(
     }
   } else if (item.kind === 'call') {
     const id = processBalancesCallItem(item)
-    if(id == null) return
+    if (id == null) return
 
     actions.push(
       new EnsureAccount(block, undefined, {
@@ -281,19 +305,18 @@ async function processAccountItem(
 
 async function getGenesisAccount(ctx: Context, block: SubstrateBlock) {
   const accounts = config.genesisAccount?.accounts
-  if(accounts==null) return
+  if (accounts == null) return
 
-  for(let i=0; i < accounts.length; i++){
+  for (let i = 0; i < accounts.length; i++) {
     const actions: Action[] = []
     const id = encodeId(accounts[i], config.prefix)
     actions.push(
       new EnsureAccount(block, undefined, {
         id,
         block
-      }),
+      })
     )
 
     await Action.process(ctx, actions)
   }
 }
-
