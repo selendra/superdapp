@@ -10,16 +10,19 @@ import { Context as ActionContext } from '../..'
 import { IdentityInfo } from '../../../chains/selendra/types/v9111'
 
 export interface RenameIdentitySubData {
-  sub: () => Promise<IdentitySub | undefined>
+  subId: string
   name: string | null
 }
 
 export class RenameSubAction extends Action<RenameIdentitySubData> {
   protected async _perform(ctx: ActionContext): Promise<void> {
-    const sub = await this.data.sub()
+    const sub = await ctx.store.findOneOrFail(IdentitySub, {
+      where: { id: this.data.subId }
+    })
+
+    console.log(sub)
 
     if (sub == null) return
-
     sub.name = this.data.name
 
     await ctx.store.upsert(sub)
@@ -45,7 +48,7 @@ export class EnsureIdentityAction extends Action<EnsureIdentityData> {
       id: this.data.id,
       account,
       isKilled: false,
-      judgement: Judgement.Unknown,
+      judgement: Judgement.Unknown
     })
 
     await ctx.store.insert(identity)
@@ -110,6 +113,7 @@ export class GiveJudgementAction extends Action<GiveJudgementData> {
       where: { id: this.data.id }
     })
 
+    // case error cannot query account
     identity.account = account
     identity.judgement = this.data.judgement
 
@@ -118,17 +122,19 @@ export class GiveJudgementAction extends Action<GiveJudgementData> {
 }
 
 export interface EnsureIdentitySubData {
-  sub: () => Promise<IdentitySub | undefined>
-  account: () => Promise<Account>
   id: string
 }
 
 export class EnsureIdentitySubAction extends Action<EnsureIdentitySubData> {
   protected async _perform(ctx: ActionContext): Promise<void> {
-    const account = await this.data.account()
-
-    let sub = await this.data.sub()
+    let sub = await ctx.store.findOne(IdentitySub, {
+      where: { id: this.data.id }
+    })
     if (sub != null) return
+
+    const account = await ctx.store.findOneOrFail(Account, {
+      where: { id: this.data.id }
+    })
 
     sub = new IdentitySub({
       id: this.data.id,
@@ -140,32 +146,46 @@ export class EnsureIdentitySubAction extends Action<EnsureIdentitySubData> {
 }
 
 export interface AddIdentitySubData {
-  identity: () => Promise<Identity| undefined>
-  sub: () => Promise<IdentitySub | undefined>
+  originId: string
+  subId: string
 }
 
 export class AddIdentitySubAction extends Action<AddIdentitySubData> {
   protected async _perform(ctx: ActionContext): Promise<void> {
-    const identity = await this.data.identity()
-    if (!identity) return
+    const identity = await ctx.store.findOneOrFail(Identity, {
+      where: { id: this.data.originId }
+    })
+    const account = await ctx.store.findOneOrFail(Account, {
+      where: { id: this.data.originId }
+    })
+    identity.account = account
 
-    let sub = await this.data.sub()
-    if (!sub) return
-
+    const subAccount = await ctx.store.findOneOrFail(Account, {
+      where: { id: this.data.subId }
+    })
+    const sub = await ctx.store.findOneOrFail(IdentitySub, {
+      where: { id: this.data.subId }
+    })
     sub.super = identity
+    sub.account = subAccount
 
     await ctx.store.upsert(sub)
   }
 }
 
 export interface ClearIdentityData {
-  identity: () => Promise<Identity | undefined>
+  id: string
 }
 
 export class ClearIdentityAction extends Action<ClearIdentityData> {
   protected async _perform(ctx: ActionContext): Promise<void> {
-    const identity = await this.data.identity()
-    if (!identity) return
+    const identity = await ctx.store.findOneOrFail(Identity, {
+      where: { id: this.data.id }
+    })
+
+    const account = await ctx.store.findOneOrFail(Account, {
+      where: { id: this.data.id }
+    })
 
     identity.display = null
     identity.email = null
@@ -176,6 +196,7 @@ export class ClearIdentityAction extends Action<ClearIdentityData> {
     identity.pgpFingerprint = null
     identity.legal = null
     identity.additional = null
+    identity.account = account
 
     await ctx.store.upsert(identity)
   }

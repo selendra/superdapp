@@ -56,8 +56,13 @@ export class EnsureAccount extends Action<AccountData> {
       lastStateTimestamp = this.block.timestamp
     }
 
+    try {
+      
+    } catch (error) {
+      
+    }
     await ctx.store.save(account)
-    ctx.log.child('accounts').info(`updated: ${account.id}`)
+    // ctx.log.child('accounts').info(`updated: ${account.id}`)
   }
 }
 

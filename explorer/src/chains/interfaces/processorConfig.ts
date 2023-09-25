@@ -19,4 +19,5 @@ export interface ProcessorConfig {
   dataSource: Parameters<SubstrateProcessor<any>['setDataSource']>[0]
   blockRange?: Parameters<SubstrateProcessor<any>['setBlockRange']>[0]
   genesisAccount?: IGenesisConfing
+  sentry?: string
 }
