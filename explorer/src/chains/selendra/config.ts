@@ -33,5 +33,6 @@ export const config: ProcessorConfig = {
   blockRange: {
     from: 0
   },
-  genesisAccount: SELENDRA_GENESIS_ACCOUNT_CONFIG
+  genesisAccount: SELENDRA_GENESIS_ACCOUNT_CONFIG,
+  sentry: process.env.SENTRY
 }
