@@ -1,0 +1,41 @@
+{
+  "outDir": "src/chains/selendra/types",
+  "specVersions": "https://kusama.archive.subsquid.io/graphql",
+  "events": [
+    "Balances.Transfer",
+    "Balances.Endowed",
+    "Balances.BalanceSet",
+    "Balances.Reserved",
+    "Balances.Unreserved",
+    "Balances.ReserveRepatriated",
+    "Balances.Deposit",
+    "Balances.Withdraw",
+    "Balances.Slashed",
+    "Staking.Reward",
+    "Staking.Rewarded",
+    "Identity.IdentityCleared",
+    "Identity.IdentityKilled",
+    "Identity.SubIdentityRemoved",
+    "Identity.SubIdentityRevoked",
+    "System.NewAccount"
+  ],
+  "calls": [
+    "Balances.transfer",
+    "Balances.force_transfer",
+    "Balances.transfer_keep_alive",
+    "Balances.transfer_all",
+    "Staking.payout_stakers",
+    "Identity.set_identity",
+    "Identity.set_subs",
+    "Identity.provide_judgement",
+    "Identity.add_sub",
+    "Identity.clear_identity",
+    "Identity.kill_identity",
+    "Identity.rename_sub"
+  ],
+  "storage": [
+    "System.Account",
+    "Balances.Account",
+    "Balances.TotalIssuance"
+  ]
+}

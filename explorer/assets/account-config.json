@@ -1,0 +1,17 @@
+{
+    "accountItems": [
+      "Balances.BalanceSet",
+      "Balances.Endowed",
+      "Balances.Deposit",
+      "Balances.Reserved",
+      "Balances.Unreserved",
+      "Balances.Withdraw",
+      "Balances.Slashed",
+      "Balances.Transfer",
+      "Balances.ReserveRepatriated",
+      "Staking.Reward",
+      "Staking.Rewarded",
+      "Staking.payout_stakers",
+      "Identity.set_identity"
+    ]
+  }

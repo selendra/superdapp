@@ -1,0 +1,255 @@
+enum Judgement {
+  Unknown
+  FeePaid
+  Reasonable
+  KnownGood
+  OutOfDate
+  LowQuality
+  Erroneous
+}
+
+enum TransferDirection {
+  From
+  To
+}
+
+enum ActivityType {
+  CONTRACT
+  CONTRACTCALL
+  CODESTORED
+  CODEUPDATED
+  CONTRACTTERMINATE
+}
+
+type Balance {
+  free: BigInt
+  reserved: BigInt
+  miscFrozen: BigInt
+  feeFrozen: BigInt
+}
+
+type StorageInfo {
+  storageBytes: Int
+  storageItems: Int
+  storageByteDeposit: BigInt
+  storageItemDeposit: BigInt
+  storageBaseDeposit: BigInt
+}
+
+type IdentityAdditionalField {
+    name: String
+    value: String
+}
+
+type ChainProperties @entity {
+  id: ID!
+  name: String!
+  token: Token!
+  ss58Format: Int!
+}
+
+type Token @entity {
+  id: ID!
+  tokenDecimals: Int!
+  tokenSymbol: String!
+}
+
+type ChainState @entity {
+  id: ID!
+  tokenBalance: BigInt!
+  tokenHolders: Int!
+  timestamp: DateTime! @index
+  blockNumber: Int! @index
+}
+
+type Account @entity {
+  "Account address"
+  id: ID!
+  balance: Balance
+  contract: Contract @derivedFrom(field: "account")
+  contractsDeployed: [Contract!] @derivedFrom(field: "deployer")
+  codesOwned: [ContractCode!] @derivedFrom(field: "owner")
+  transfers: [Transfer!] @derivedFrom(field: "account")
+  rewards: [StakingReward!] @derivedFrom(field: "account")
+  identity: Identity @derivedFrom(field: "account")
+  sub: IdentitySub @derivedFrom(field: "account")
+  createdAt: DateTime!
+  tags: [String!]
+}
+
+type Contract @entity {
+  "Contract address"
+  id: ID!
+  trieId: Bytes!
+  account: Account! @unique
+  deployer: Account!
+  contractCode: ContractCode!
+  createdAt: DateTime! @index
+  terminatedAt: DateTime
+  terminatedFrom: Extrinsic
+  terminationBeneficiary: Account
+  salt: String
+  createdFrom: Extrinsic!
+  storageInfo: StorageInfo!
+  codeHashChanges: [CodeHashChange!] @derivedFrom(field: "contract")
+}
+
+type CodeHashChange @entity {
+  id: ID!
+  contract: Contract!
+  newCodeHash: String!
+  oldCodeHash: String!
+  changedAt: DateTime!
+  extrinsic: Extrinsic!
+}
+
+type ContractCode @entity {
+  "Code Hash"
+  id: ID!
+  code: Bytes!
+  owner: Account!
+  createdAt: DateTime!
+  createdFrom: Extrinsic!
+  removedAt: DateTime
+  removedFrom: Extrinsic
+  contractsDeployed: [Contract!] @derivedFrom(field: "contractCode")
+}
+
+type ContractEvent @entity {
+  "Event ID"
+  id: ID!
+  blockNumber: String!
+  indexInBlock: String!
+  contractAddress: String!
+  data: Bytes!
+  createdAt: DateTime!
+  extrinsic: Extrinsic!
+  decodedEvent: DecodedContractEvent @derivedFrom(field: "contractEvent")
+}
+
+type Transfer @entity {
+    id: ID!
+    transfer: NativeTransfer
+    account: Account!
+    direction: TransferDirection
+}
+
+type NativeTransfer @entity {
+    id: ID!
+    blockNumber: Int! @index
+    timestamp: DateTime! @index
+    extrinsicHash: String @index
+    from: Account!
+    to: Account!
+    amount: BigInt! @index
+    success: Boolean!
+}
+
+type StakingReward @entity {
+    id: ID!
+    timestamp: DateTime!
+    blockNumber: Int! @index
+    extrinsicHash: String @index
+    account: Account!
+    amount: BigInt!
+    era: Int
+    validatorId: ID
+}
+
+type Identity @entity {
+    id: ID!
+    account: Account! @unique
+    judgement: Judgement!
+    subs: [IdentitySub!] @derivedFrom(field: "super")
+    additional: [IdentityAdditionalField!]
+    display: String
+    legal: String
+    web: String
+    riot: String
+    email: String
+    pgpFingerprint: String
+    image: String
+    twitter: String
+    isKilled: Boolean!
+}
+
+type IdentitySub @entity {
+    id: ID!
+    super: Identity
+    account: Account! @unique
+    name: String
+}
+
+type DecodedEventArg @entity {
+  id: ID!
+  decodedEvent: DecodedContractEvent!
+  name: String!
+  value: String!
+  type: String!
+  displayName: String
+}
+
+type DecodedContractActivity @entity {
+  id: ID!
+  name: String! @index
+  activity: Activity! @unique
+  args: [DecodedActivityArg!] @derivedFrom(field: "decodedActivity")
+}
+
+type DecodedActivityArg @entity {
+  id: ID!
+  decodedActivity: DecodedContractActivity!
+  name: String!
+  value: String!
+  type: String!
+  displayName: String
+}
+
+type DecodedContractEvent @entity {
+  id: ID!
+  name: String! @index
+  contractEvent: ContractEvent! @unique
+  args: [DecodedEventArg!] @derivedFrom(field: "decodedEvent")
+}
+
+type Activity @entity{
+  id: ID!
+  type: ActivityType! @index
+  action: String!
+  to: Account
+  from: Account
+  createdAt: DateTime! @index
+  args: JSON
+  extrinsic: Extrinsic!
+  decodedActivity: DecodedContractActivity @derivedFrom(field: "activity")
+}
+
+type Extrinsic @entity {
+  id: ID!
+  blockNumber: Int!
+  indexInBlock: Int!
+  versionInfo: Int!
+  name: String!
+  signer: String
+  signature: String
+  success: Boolean!
+  error: JSON
+  fee: BigInt
+  tip: BigInt
+  hash: String!
+  createdAt: DateTime!
+  args: JSON
+  events: [Events!] @derivedFrom(field: "extrinsic")
+}
+
+
+type Events @entity {
+  id: ID!
+  extrinsic: Extrinsic!
+  name: String!
+  method: String!
+  blockNumber: String!
+  indexInBlock: String!
+  createdAt: DateTime!
+  params: JSON
+}
