@@ -3,7 +3,7 @@ import {
   IBlackListConfing,
   IGenesisConfing,
   IAccountConfing
-} from '../interfaces/processorConfig'
+} from '../../interfaces/processorConfig'
 import fs from 'fs'
 
 const SELENDRA_GENESIS_ACCOUNT_CONFIG: IGenesisConfing = getJSON(
@@ -26,5 +26,7 @@ export const config: ProcessorConfig = {
     from: 0
   },
   genesisAccount: SELENDRA_GENESIS_ACCOUNT_CONFIG,
-  sentry: process.env.SENTRY
+  sentry: process.env.SENTRY,
+  sourceCodeEnabled: (process.env.SOURCE_CODE_ENABLED || "false") === "true",
+  verifierEndpoint: process.env.VERIFIER_ENDPOINT || "http://127.0.0.1:3001",
 }

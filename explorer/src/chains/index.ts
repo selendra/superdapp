@@ -1,4 +1,4 @@
-import { ProcessorConfig } from './interfaces/processorConfig'
+import { ProcessorConfig } from '../interfaces/processorConfig'
 export * from './selendra'
 
 export function getChain(): { config: ProcessorConfig } {

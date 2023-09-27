@@ -20,4 +20,6 @@ export interface ProcessorConfig {
   blockRange?: Parameters<SubstrateProcessor<any>['setBlockRange']>[0]
   genesisAccount?: IGenesisConfing
   sentry?: string
+  sourceCodeEnabled: boolean,
+  verifierEndpoint: string,
 }

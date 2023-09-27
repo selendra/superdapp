@@ -1,6 +1,6 @@
 {
   "outDir": "src/chains/selendra/types",
-  "specVersions": "https://kusama.archive.subsquid.io/graphql",
+  "specVersions": "https://archive-graphql.selendra.org/graphql",
   "events": [
     "Balances.Transfer",
     "Balances.Endowed",
@@ -11,7 +11,6 @@
     "Balances.Deposit",
     "Balances.Withdraw",
     "Balances.Slashed",
-    "Staking.Reward",
     "Staking.Rewarded",
     "Identity.IdentityCleared",
     "Identity.IdentityKilled",
@@ -31,11 +30,13 @@
     "Identity.add_sub",
     "Identity.clear_identity",
     "Identity.kill_identity",
-    "Identity.rename_sub"
+    "Identity.rename_sub",
+    "Contracts.call"
   ],
   "storage": [
     "System.Account",
     "Balances.Account",
-    "Balances.TotalIssuance"
+    "Balances.TotalIssuance",
+    "Contracts.ContractInfoOf"
   ]
 }

@@ -128,6 +128,55 @@ export class BalancesTotalIssuanceStorage {
   }
 }
 
+export class ContractsContractInfoOfStorage {
+  private readonly _chain: Chain
+  private readonly blockHash: string
+
+  constructor(ctx: BlockContext)
+  constructor(ctx: ChainContext, block: Block)
+  constructor(ctx: BlockContext, block?: Block) {
+    block = block || ctx.block
+    this.blockHash = block.hash
+    this._chain = ctx._chain
+  }
+
+  /**
+   *  The code associated with a given account.
+   * 
+   *  TWOX-NOTE: SAFE since `AccountId` is a secure hash.
+   */
+  get isV10000() {
+    return this._chain.getStorageItemTypeHash('Contracts', 'ContractInfoOf') === '2ed3030a48bdd27968f084078d4be8ce85cf8eb4a02dee5baf25409f96c4aa32'
+  }
+
+  /**
+   *  The code associated with a given account.
+   * 
+   *  TWOX-NOTE: SAFE since `AccountId` is a secure hash.
+   */
+  async getAsV10000(key: Uint8Array): Promise<v10000.ContractInfo | undefined> {
+    assert(this.isV10000)
+    return this._chain.getStorage(this.blockHash, 'Contracts', 'ContractInfoOf', key)
+  }
+
+  async getManyAsV10000(keys: Uint8Array[]): Promise<(v10000.ContractInfo | undefined)[]> {
+    assert(this.isV10000)
+    return this._chain.queryStorage(this.blockHash, 'Contracts', 'ContractInfoOf', keys.map(k => [k]))
+  }
+
+  async getAllAsV10000(): Promise<(v10000.ContractInfo)[]> {
+    assert(this.isV10000)
+    return this._chain.queryStorage(this.blockHash, 'Contracts', 'ContractInfoOf')
+  }
+
+  /**
+   * Checks whether the storage item is defined for the current chain version.
+   */
+  get isExists(): boolean {
+    return this._chain.getStorageItemTypeHash('Contracts', 'ContractInfoOf') != null
+  }
+}
+
 export class SystemAccountStorage {
   private readonly _chain: Chain
   private readonly blockHash: string
