@@ -1,5 +1,15 @@
 import type {Result} from './support'
 
+export type BalanceStatus = BalanceStatus_Free | BalanceStatus_Reserved
+
+export interface BalanceStatus_Free {
+  __kind: 'Free'
+}
+
+export interface BalanceStatus_Reserved {
+  __kind: 'Reserved'
+}
+
 export type MultiAddress = MultiAddress_Id | MultiAddress_Index | MultiAddress_Raw | MultiAddress_Address32 | MultiAddress_Address20
 
 export interface MultiAddress_Id {
@@ -259,4 +269,19 @@ export interface IdentityInfo {
   pgpFingerprint: (Uint8Array | undefined)
   image: Data
   twitter: Data
+}
+
+export interface AccountData {
+  free: bigint
+  reserved: bigint
+  frozen: bigint
+  flags: bigint
+}
+
+export interface AccountInfo {
+  nonce: number
+  consumers: number
+  providers: number
+  sufficients: number
+  data: AccountData
 }
