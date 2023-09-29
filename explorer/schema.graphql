@@ -106,7 +106,6 @@ type CodeHashChange @entity {
 type ContractCode @entity {
   "Code Hash"
   id: ID!
-  code: Bytes!
   owner: Account!
   createdAt: DateTime!
   createdFrom: Extrinsic!

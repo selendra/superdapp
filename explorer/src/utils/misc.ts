@@ -1,12 +1,12 @@
 import { Keyring } from '@polkadot/api'
 import { SubstrateExtrinsicSignature } from '@subsquid/substrate-processor'
 import { toHex } from '@subsquid/util-internal-hex'
-import { config } from '../chains'
+import { ss58Format } from '../chains'
 
 const keyring = new Keyring()
 
 export function encodeAddress(id: Uint8Array | string) {
-  return keyring.encodeAddress(id, Number(config.prefix))
+  return keyring.encodeAddress(id, Number(ss58Format))
 }
 
 export function decodeAddress(id: string) {

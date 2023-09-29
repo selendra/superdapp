@@ -128,6 +128,51 @@ export class BalancesTotalIssuanceStorage {
   }
 }
 
+export class ContractsCodeInfoOfStorage {
+  private readonly _chain: Chain
+  private readonly blockHash: string
+
+  constructor(ctx: BlockContext)
+  constructor(ctx: ChainContext, block: Block)
+  constructor(ctx: BlockContext, block?: Block) {
+    block = block || ctx.block
+    this.blockHash = block.hash
+    this._chain = ctx._chain
+  }
+
+  /**
+   *  A mapping from a contract's code hash to its code info.
+   */
+  get isV10000() {
+    return this._chain.getStorageItemTypeHash('Contracts', 'CodeInfoOf') === '14afed0b78ca8603cba6db022558f6c0e9aabac216a6a3b3853ff20ac62f41b8'
+  }
+
+  /**
+   *  A mapping from a contract's code hash to its code info.
+   */
+  async getAsV10000(key: Uint8Array): Promise<v10000.CodeInfo | undefined> {
+    assert(this.isV10000)
+    return this._chain.getStorage(this.blockHash, 'Contracts', 'CodeInfoOf', key)
+  }
+
+  async getManyAsV10000(keys: Uint8Array[]): Promise<(v10000.CodeInfo | undefined)[]> {
+    assert(this.isV10000)
+    return this._chain.queryStorage(this.blockHash, 'Contracts', 'CodeInfoOf', keys.map(k => [k]))
+  }
+
+  async getAllAsV10000(): Promise<(v10000.CodeInfo)[]> {
+    assert(this.isV10000)
+    return this._chain.queryStorage(this.blockHash, 'Contracts', 'CodeInfoOf')
+  }
+
+  /**
+   * Checks whether the storage item is defined for the current chain version.
+   */
+  get isExists(): boolean {
+    return this._chain.getStorageItemTypeHash('Contracts', 'CodeInfoOf') != null
+  }
+}
+
 export class ContractsContractInfoOfStorage {
   private readonly _chain: Chain
   private readonly blockHash: string

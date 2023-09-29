@@ -15,9 +15,6 @@ export class ContractCode {
   @PrimaryColumn_()
   id!: string
 
-  @Column_("bytea", {nullable: false})
-  code!: Uint8Array
-
   @Index_()
   @ManyToOne_(() => Account, {nullable: true})
   owner!: Account

@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "@sentry/node": "^7.70.0"
-  }
-}

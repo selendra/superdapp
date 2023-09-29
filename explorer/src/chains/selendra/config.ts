@@ -1,8 +1,6 @@
 import {
   ProcessorConfig,
-  IBlackListConfing,
   IGenesisConfing,
-  IAccountConfing
 } from '../../interfaces/processorConfig'
 import fs from 'fs'
 
@@ -29,4 +27,8 @@ export const config: ProcessorConfig = {
   sentry: process.env.SENTRY,
   sourceCodeEnabled: (process.env.SOURCE_CODE_ENABLED || "false") === "true",
   verifierEndpoint: process.env.VERIFIER_ENDPOINT || "http://127.0.0.1:3001",
+  token: {
+    tokenDecimals: 18,
+    tokenSymbol: "SEL",
+  },
 }

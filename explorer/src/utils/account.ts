@@ -1,9 +1,8 @@
 import { decodeHex, SubstrateBlock } from "@subsquid/substrate-processor";
 import * as ss58 from "@subsquid/ss58";
 import {
-  NormalisedBalancesAccountStorage,
-  NormalisedSystemAccountStorage,
-} from "../chains/";
+  api
+} from "../chains";
 import { Store } from "@subsquid/typeorm-store";
 import { Ctx } from "../interfaces/handler";
 import { Account, Balance } from "../model";
@@ -18,7 +17,7 @@ export async function updateAccountBalance(
     const balancesStorage = process.env.BALANCES_STORE;
     switch (balancesStorage) {
       case "system": {
-        const accountStorage = await new NormalisedSystemAccountStorage(
+        const accountStorage = await new api.storage.NormalisedSystemAccountStorage(
           ctx,
           block
         ).get(id);
@@ -28,7 +27,7 @@ export async function updateAccountBalance(
       }
       case "balances": {
         const { free, reserved, miscFrozen, feeFrozen } =
-          await new NormalisedBalancesAccountStorage(ctx, block).get(id);
+          await new api.storage.NormalisedBalancesAccountStorage(ctx, block).get(id);
         account.balance = new Balance({ free, reserved, miscFrozen, feeFrozen });
         break;
       }

@@ -283,6 +283,14 @@ export interface AccountData {
   flags: bigint
 }
 
+export interface CodeInfo {
+  owner: Uint8Array
+  deposit: bigint
+  refcount: bigint
+  determinism: Determinism
+  codeLen: number
+}
+
 export interface ContractInfo {
   trieId: Uint8Array
   depositAccount: Uint8Array
@@ -300,4 +308,14 @@ export interface AccountInfo {
   providers: number
   sufficients: number
   data: AccountData
+}
+
+export type Determinism = Determinism_Enforced | Determinism_Relaxed
+
+export interface Determinism_Enforced {
+  __kind: 'Enforced'
+}
+
+export interface Determinism_Relaxed {
+  __kind: 'Relaxed'
 }

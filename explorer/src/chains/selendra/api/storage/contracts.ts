@@ -1,6 +1,7 @@
 import assert from 'assert'
-import { ResolvedContractInfoOfStorage } from '../../../../interfaces/normalised'
-import { ContractsContractInfoOfStorage } from '../../types/storage'
+import { decodeHex } from "@subsquid/util-internal-hex";
+import { ResolvedContractInfoOfStorage, ResolvedCodeInfoOfStorage } from '../../../../interfaces/normalised'
+import { ContractsContractInfoOfStorage, ContractsCodeInfoOfStorage, } from '../../types/storage'
 import { decodeAddress } from '../../../../utils'
 
 export class NormalisedContractInfoOfStorage extends ContractsContractInfoOfStorage {
@@ -21,5 +22,22 @@ export class NormalisedContractInfoOfStorage extends ContractsContractInfoOfStor
     throw new Error(
       `ContractInfoOf not found in storage for accountId [${accountId}]`
     )
+  }
+}
+
+export class NormalisedCodeStorageStorage extends ContractsCodeInfoOfStorage {
+  async get(key: string): Promise<ResolvedCodeInfoOfStorage> {
+    assert(this.isExists);
+    let info: ResolvedCodeInfoOfStorage | undefined;
+    const codeHash = decodeHex(key);
+    if (this.isV10000) {
+      info = await this.getAsV10000(codeHash);
+    } else {
+      throw new Error("No Runtime version found");
+    }
+    if (info) {
+      return info;
+    }
+    throw new Error(`CodeStorage not found in storage for key [${key}]`);
   }
 }

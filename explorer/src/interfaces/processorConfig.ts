@@ -22,4 +22,8 @@ export interface ProcessorConfig {
   sentry?: string
   sourceCodeEnabled: boolean,
   verifierEndpoint: string,
+  token: {
+    tokenDecimals: number,
+    tokenSymbol: string
+  }
 }

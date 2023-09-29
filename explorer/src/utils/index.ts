@@ -1,3 +1,4 @@
 export * from './misc'
-export * from './entities'
-export * from './accounts'
+export * from './entitie'
+export * from './account'
+export * from './contract'

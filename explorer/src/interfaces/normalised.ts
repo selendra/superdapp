@@ -1,13 +1,5 @@
 import { Weight } from "./handler";
 
-export interface ResolvedContractsCallCall {
-  contractAddress: string;
-  value?: bigint;
-  gasLimit?: Weight;
-  storageDepositLimit?: bigint;
-  data?: Uint8Array;
-}
-
 export interface ResolvedBalancesTransferEvent {
   from: string
   to: string
@@ -48,4 +40,53 @@ export interface ResolvedContractInfoOfStorage {
   storageByteDeposit?: bigint;
   storageItemDeposit?: bigint;
   storageBaseDeposit?: bigint;
+}
+
+export interface ResolvedContractsCallCall {
+  contractAddress: string;
+  value?: bigint;
+  gasLimit?: Weight;
+  storageDepositLimit?: bigint;
+  data?: Uint8Array;
+}
+
+export interface ResolvedContractsSetCodeCall {
+  contractAddress: string;
+  codeHash: string;
+}
+
+export interface ResolvedCodeInfoOfStorage {
+  owner: Uint8Array
+  deposit: bigint
+  refcount: bigint
+  codeLen: number
+}
+
+export interface ResolvedContractsInstantiatedEvent {
+  deployer: string;
+  contract: string;
+}
+
+export interface ResolvedContractCodeRemovedEvent {
+  codeHash: string;
+}
+
+export interface ResolvedContractsCodeStoredEvent {
+  codeHash: string;
+}
+
+export interface ResolvedContractsCodeUpdatedEvent {
+  contract: string;
+  newCodeHash: string;
+  oldCodeHash: string;
+}
+
+export interface ResolvedContractEmittedEvent {
+  contract: string;
+  data: Uint8Array;
+}
+
+export interface ResolvedContractTerminatedEvent {
+  contract: string;
+  beneficiary: string;
 }

@@ -11,11 +11,17 @@
     "Balances.Deposit",
     "Balances.Withdraw",
     "Balances.Slashed",
-    "Staking.Rewarded",
+    "Contracts.Instantiated",
+    "Contracts.ContractEmitted",
+    "Contracts.CodeStored",
+    "Contracts.ContractCodeUpdated",
+    "Contracts.CodeRemoved",
+    "Contracts.Terminated",
     "Identity.IdentityCleared",
     "Identity.IdentityKilled",
     "Identity.SubIdentityRemoved",
     "Identity.SubIdentityRevoked",
+    "Staking.Rewarded",
     "System.NewAccount"
   ],
   "calls": [
@@ -37,6 +43,7 @@
     "System.Account",
     "Balances.Account",
     "Balances.TotalIssuance",
-    "Contracts.ContractInfoOf"
+    "Contracts.ContractInfoOf",
+    "Contracts.CodeInfoOf"
   ]
 }
