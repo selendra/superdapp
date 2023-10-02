@@ -16,13 +16,22 @@ export interface ResolvedBalancesWithdrawEvent {
   amount: bigint
 }
 
+export interface ResolvedBalancesReservedEvent {
+  account: string;
+  amount: bigint;
+}
+
+export interface ResolvedBalancesReserveRepatriatedEvent {
+  from: string
+  to: string
+}
+
 export interface ResolvedNewAccountEvent {
   account: string
 }
 
-export interface ResolvedBalancesReservedEvent {
-  account: string;
-  amount: bigint;
+export interface ResolvedBalancesEvent {
+  account: string
 }
 
 export interface AccountData {

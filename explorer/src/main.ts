@@ -1,11 +1,8 @@
-// Dynamic module init must be imported first
-import "./initialise";
-
 import { SubstrateBatchProcessor } from "@subsquid/substrate-processor";
 import { TypeormDatabase } from "@subsquid/typeorm-store";
 import { createLogger } from "@subsquid/logger";
 import { Item } from "./interfaces/handler";
-import { config, ChainPropertiesStore } from "./chains";
+import { config } from "./chains";
 import { registry } from "./handlers";
 
 const logger = createLogger("sys:init");
@@ -32,15 +29,12 @@ for (const name of registry.callNames) {
   processor = processor.addCall(name) as SubstrateBatchProcessor;
 }
 
-const chainPropertiesStore = new ChainPropertiesStore();
-
 process.on("uncaughtException", (err) => {
   logger.fatal(err, "There was an uncaught error");
   process.exit(1);
 });
 
 processor.run(new TypeormDatabase(), async (ctx) => {
-  await chainPropertiesStore.save(ctx);
 
   const { log } = ctx;
 
@@ -49,7 +43,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
       try {
         const handler = registry.resolve(item as unknown as Item);
         if (handler) {
-          log.debug({ item, header }, "Handling item");
+          console.log({ item, header }, "Handling item");
           await handler(ctx, header);
         } else {
           // Calls and extrinsics that we are not handling comes together

@@ -41,19 +41,6 @@ type IdentityAdditionalField {
     value: String
 }
 
-type ChainProperties @entity {
-  id: ID!
-  name: String!
-  token: Token!
-  ss58Format: Int!
-}
-
-type Token @entity {
-  id: ID!
-  tokenDecimals: Int!
-  tokenSymbol: String!
-}
-
 type ChainState @entity {
   id: ID!
   tokenBalance: BigInt!

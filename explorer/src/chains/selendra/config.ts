@@ -23,7 +23,6 @@ export const config: ProcessorConfig = {
   blockRange: {
     from: 0
   },
-  genesisAccount: SELENDRA_GENESIS_ACCOUNT_CONFIG,
   sentry: process.env.SENTRY,
   sourceCodeEnabled: (process.env.SOURCE_CODE_ENABLED || "false") === "true",
   verifierEndpoint: process.env.VERIFIER_ENDPOINT || "http://127.0.0.1:3001",
