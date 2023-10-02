@@ -3,15 +3,22 @@
  *
  * @module handlers
  */
-import { balancesEventHandlers } from "./balances";
 import { HandlerRegistry } from "./registry";
 import { EventHandler, ExtrinsicHandler } from "../interfaces/handler";
+
+import { balancesEventHandlers } from "./balances";
 import {
+  contractsEventHandlers,
   contractsExtrinsicHandlers,
 } from "./contracts";
 
+import { systemEventHandlers } from "./system";
+
+
 const eventHandlers: Record<string, EventHandler> = {
   ...balancesEventHandlers,
+  ...contractsEventHandlers,
+  ...systemEventHandlers,
 };
 
 const extrinsicHandlers: Record<string, ExtrinsicHandler> =
