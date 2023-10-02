@@ -1,3 +1,4 @@
+import * as contractsEventHandlers from "./events";
 import * as contractsExtrinsicHandlers from "./extrinsics";
 
-export { contractsExtrinsicHandlers };
+export { contractsEventHandlers, contractsExtrinsicHandlers };
