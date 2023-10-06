@@ -30,7 +30,7 @@ export const balancesTransferHandler: EventHandler = {
 }
 
 export const balancesWithdrawHandler: EventHandler = {
-  name: "Balances.Withdraw",
+  name: 'Balances.Withdraw',
   handle: async (
     ctx: Ctx,
     event: Event,
@@ -39,13 +39,13 @@ export const balancesWithdrawHandler: EventHandler = {
     const { account } = new api.events.NormalisedBalancesWithdrawEvent(
       ctx,
       event
-    ).resolve();
-    await updateEntities({ ctx, event, block, accounts: [account] });
-  },
-};
+    ).resolve()
+    await updateEntities({ ctx, event, block, accounts: [account] })
+  }
+}
 
 export const balancesReservedHandler: EventHandler = {
-  name: "Balances.Reserved",
+  name: 'Balances.Reserved',
   handle: async (
     ctx: Ctx,
     event: Event,
@@ -54,13 +54,13 @@ export const balancesReservedHandler: EventHandler = {
     const { account } = new api.events.NormalisedBalancesReservedEvent(
       ctx,
       event
-    ).resolve();
-    await updateEntities({ ctx, event, block, accounts: [account] });
-  },
-};
+    ).resolve()
+    await updateEntities({ ctx, event, block, accounts: [account] })
+  }
+}
 
 export const balancesEndowedHandler: EventHandler = {
-  name: "Balances.Endowed",
+  name: 'Balances.Endowed',
   handle: async (
     ctx: Ctx,
     event: Event,
@@ -69,13 +69,13 @@ export const balancesEndowedHandler: EventHandler = {
     const { account } = new api.events.NormalisedBalancesEndowedEvent(
       ctx,
       event
-    ).resolve();
-    await updateEntities({ ctx, event, block, accounts: [account] });
-  },
-};
+    ).resolve()
+    await updateEntities({ ctx, event, block, accounts: [account] })
+  }
+}
 
 export const balancesSetHandler: EventHandler = {
-  name: "Balances.BalanceSet",
+  name: 'Balances.BalanceSet',
   handle: async (
     ctx: Ctx,
     event: Event,
@@ -84,13 +84,13 @@ export const balancesSetHandler: EventHandler = {
     const { account } = new api.events.NormalisedBalancesSetEvent(
       ctx,
       event
-    ).resolve();
-    await updateEntities({ ctx, event, block, accounts: [account] });
-  },
-};
+    ).resolve()
+    await updateEntities({ ctx, event, block, accounts: [account] })
+  }
+}
 
 export const balancesDepositHandler: EventHandler = {
-  name: "Balances.Deposit",
+  name: 'Balances.Deposit',
   handle: async (
     ctx: Ctx,
     event: Event,
@@ -99,12 +99,12 @@ export const balancesDepositHandler: EventHandler = {
     const { account } = new api.events.NormalisedBalancesDepositEvent(
       ctx,
       event
-    ).resolve();
+    ).resolve()
 
     console.log(account)
-    await updateEntities({ ctx, event, block, accounts: [account] });
-  },
-};
+    await updateEntities({ ctx, event, block, accounts: [account] })
+  }
+}
 
 export const balancesReserveRepatriatedHandler: EventHandler = {
   name: 'Balances.ReserveRepatriated',
@@ -122,19 +122,19 @@ export const balancesReserveRepatriatedHandler: EventHandler = {
 }
 
 export const balancesSlashedHandler: EventHandler = {
-  name: "Balances.Deposit",
+  name: 'Balances.Unreserved',
   handle: async (
     ctx: Ctx,
     event: Event,
     block: SubstrateBlock
   ): Promise<void> => {
-    const { account } = new api.events.NormalisedBalancesDepositEvent(
+    const { account } = new api.events.NormalisedBalancesUnreservedEvent(
       ctx,
       event
-    ).resolve();
-    await updateEntities({ ctx, event, block, accounts: [account] });
-  },
-};
+    ).resolve()
+    await updateEntities({ ctx, event, block, accounts: [account] })
+  }
+}
 
 async function updateEntities({
   ctx,

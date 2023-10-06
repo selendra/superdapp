@@ -1,62 +1,57 @@
-import { SubstrateBatchProcessor } from "@subsquid/substrate-processor";
-import { TypeormDatabase } from "@subsquid/typeorm-store";
-import { createLogger } from "@subsquid/logger";
-import { Item } from "./interfaces/handler";
-import { config } from "./chains";
-import { registry } from "./handlers";
+import { SubstrateBatchProcessor } from '@subsquid/substrate-processor'
+import { TypeormDatabase } from '@subsquid/typeorm-store'
+import { createLogger } from '@subsquid/logger'
+import { Item } from './interfaces/handler'
+import { config } from './chains'
+import { registry } from './handlers'
 
-const logger = createLogger("sys:init");
+const logger = createLogger('sys:init')
 
 logger.info(
   {
     eventHandlers: registry.eventNames,
-    callHandlers: registry.callNames,
+    callHandlers: registry.callNames
   },
-  "Handlers Registry"
-);
+  'Handlers Registry'
+)
 
-logger.info(config, "Instantiating Squid Processor");
+logger.info(config, 'Instantiating Squid Processor')
 
 let processor = new SubstrateBatchProcessor()
   .setBlockRange(config.blockRange)
-  .setDataSource(config.dataSource);
+  .setDataSource(config.dataSource)
 
 for (const name of registry.eventNames) {
-  processor = processor.addEvent(name) as SubstrateBatchProcessor;
+  processor = processor.addEvent(name) as SubstrateBatchProcessor
 }
 
 for (const name of registry.callNames) {
-  processor = processor.addCall(name) as SubstrateBatchProcessor;
+  processor = processor.addCall(name) as SubstrateBatchProcessor
 }
 
-process.on("uncaughtException", (err) => {
-  logger.fatal(err, "There was an uncaught error");
-  process.exit(1);
-});
+process.on('uncaughtException', (err) => {
+  logger.fatal(err, 'There was an uncaught error')
+  process.exit(1)
+})
 
 processor.run(new TypeormDatabase(), async (ctx) => {
-
-  const { log } = ctx;
-
+  const { log } = ctx
   for (const { items, header } of ctx.blocks) {
     for (const item of items) {
       try {
-        const handler = registry.resolve(item as unknown as Item);
+        const handler = registry.resolve(item as unknown as Item)
         if (handler) {
-          console.log({ item, header }, "Handling item");
-          await handler(ctx, header);
+          console.log({ item, header }, 'Handling item')
+          await handler(ctx, header)
         } else {
-          // Calls and extrinsics that we are not handling comes together
-          // with some events that we are (balances and systems events).
-          // There will be no handlers found but it's not an error
-          log.debug(item, "No handler found for item");
+          log.debug(item, 'No handler found for item')
         }
       } catch (error) {
         log.error(
           { item, error: <Error>error },
-          "Error while handling block items"
-        );
+          'Error while handling block items'
+        )
       }
     }
   }
-});
+})
