@@ -1,125 +1,10 @@
-##-------------------------Block--------------------------###
-
-type Block @entity {
-  "BlockHeight-blockHash - e.g. 0001812319-0001c"
-  id: ID!
-  height: Int! @index
-  hash: String! @index
-  parentHash: String!
-  timestamp: DateTime! @index
-  specVersion: Int! @index
-  validator: String @index
-  extrinsicsCount: Int!
-  callsCount: Int!
-  eventsCount: Int!
-  extrinsics: [Extrinsic]! @derivedFrom(field: "block")
-  calls: [Call]! @derivedFrom(field: "block")
-  events: [Event]! @derivedFrom(field: "block")
-}
-
-type Extrinsic @entity {
-  id: ID!
-  block: Block
-  mainCall: Call
-  calls: [Call]! @derivedFrom(field: "extrinsic")
-  events: [Event]! @derivedFrom(field: "extrinsic")
-  blockNumber: Int @index
-  timestamp: DateTime @index
-  extrinsicHash: String @index
-  indexInBlock: Int
-  version: Int @index
-  signerPublicKey: String @index
-  success: Boolean @index
-  error: String
-  tip: BigInt
-  fee: BigInt
-}
-
-type Event @entity @index(fields: ["id","palletName","eventName"]) {
-  "Event id - e.g. 0000000001-000000-272d6"
-  id: ID!
-  block: Block!
-  blockNumber: Int! @index
-  timestamp: DateTime! @index
-  extrinsicHash: String @index
-  extrinsic: Extrinsic
-  call: Call
-  indexInBlock: Int
-  eventName: String! @index
-  palletName: String! @index
-  argsStr: [String]
-}
-
-type Call @entity @index(fields: ["id","palletName","callName"]) {
-  id: ID!
-  parentId: String @index
-  block: Block!
-  extrinsic: Extrinsic
-  extrinsicHash: String @index
-  blockNumber: Int! @index
-  timestamp: DateTime! @index
-  callName: String! @index
-  palletName: String! @index
-  success: Boolean! @index
-  callerPublicKey: String @index
-  argsStr: [String]
-}
-
-enum CounterLevel {
-  Global
-  Pallet
-  Item
-}
-
-enum ItemType {
-  Extrinsics
-  Calls
-  Events
-}
-
-type ItemsCounter @entity {
-  id: ID!
-  type: ItemType! @index
-  level: CounterLevel! @index
-  total: Int! @index
-}
-
-###-------------------------Account--------------------------###
-
 type Account @entity {
-  id: ID!
-  free: BigInt!
-  reserved: BigInt!
-  total: BigInt!
-  updatedAt: Int
-  transfers: [Transfer!] @derivedFrom(field: "account")
-  rewards: [StakingReward!] @derivedFrom(field: "account")
-  identity: Identity @derivedFrom(field: "account")
-  sub: IdentitySub @derivedFrom(field: "account")
-}
-
-type ChainState @entity {
-  id: ID!
-  tokenBalance: BigInt!
-  tokenHolders: Int!
-  timestamp: DateTime! @index
-  blockNumber: Int! @index
-}
-
-###-------------------------Staking Reward--------------------------###
-
-type StakingReward @entity {
     id: ID!
-    timestamp: DateTime!
-    blockNumber: Int! @index
-    extrinsicHash: String @index
-    account: Account!
-    amount: BigInt!
-    era: Int
-    validatorId: ID
+    transfers: [Transfer!] @derivedFrom(field: "account")
+    rewards: [StakingReward!] @derivedFrom(field: "account")
+    identity: Identity @derivedFrom(field: "account")
+    sub: IdentitySub @derivedFrom(field: "account")
 }
-
-###-------------------------Transfer--------------------------###
 
 enum TransferDirection {
     From
@@ -145,7 +30,16 @@ type NativeTransfer @entity {
     success: Boolean!
 }
 
-###-------------------------Identity--------------------------###
+type StakingReward @entity {
+    id: ID!
+    timestamp: DateTime!
+    blockNumber: Int! @index
+    extrinsicHash: String @index
+    account: Account!
+    amount: BigInt!
+    era: Int
+    validatorId: ID
+}
 
 type IdentityAdditionalField {
     name: String

@@ -1,0 +1,1 @@
+{"types":{},"versions":[{"minmax":[0,null],"types":{"BurnTxDetails":{"approvals":"u32","approvers":"Vec<AccountId>"},"OrmlVestingSchedule":{"start":"BlockNumber","period":"BlockNumber","periodCount":"u32","perPeriod":"Compact<Balance>"},"VestingScheduleOf":"OrmlVestingSchedule"}}]}

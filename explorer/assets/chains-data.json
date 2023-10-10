@@ -1,0 +1,14 @@
+[
+  {
+    "prefix": 2,
+    "network": "kusama",
+    "displayName": "Kusama Relay Chain",
+    "symbols": [
+      "KSM"
+    ],
+    "decimals": [
+      12
+    ],
+    "archiveName": "kusama"
+  }
+]
