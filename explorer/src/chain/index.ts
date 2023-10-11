@@ -1,10 +1,11 @@
 import { assertNotNull } from '@subsquid/substrate-processor'
-import { ProcessorConfig, ChainApi, IChainData } from './interfaces'
-import {
-  KnownArchivesSubstrate,
-  lookupArchive,
-} from '@subsquid/archive-registry'
+import { ProcessorConfig, ChainApi, IChainData, IBlackListConfing } from './interfaces'
 import fs from 'fs'
+
+function getJSON(filename: string) {
+  const data = fs.readFileSync(filename).toString()
+  return JSON.parse(data)
+}
 
 function getChain(): { api: ChainApi; config: ProcessorConfig } {
   const chainName = assertNotNull(
@@ -27,16 +28,17 @@ function getChain(): { api: ChainApi; config: ProcessorConfig } {
   if (!chainConfig) {
     throw new Error(`Chain ${chainName} not found in assets/chains-data.json`)
   }
-
+  
   let processorConfig: ProcessorConfig = {
     chainName: chainConfig.network,
     dataSource: {
-      archive: lookupArchive(
-        chainConfig.archiveName as KnownArchivesSubstrate,
-        { release: 'FireSquid' }
-      ),
+      archive: 'https://archive-graphql.selendra.org/graphql',
+      chain: 'wss://rpc1.selendra.org'
     },
     prefix: chainConfig.prefix,
+    blockRange: {
+      from: 0
+    },
   }
 
   if (chainAPI.customConfig) {
@@ -45,5 +47,9 @@ function getChain(): { api: ChainApi; config: ProcessorConfig } {
 
   return { api: chainAPI.api, config: processorConfig }
 }
+
+export const BLACKLIST_CONFIG: IBlackListConfing = getJSON(
+  'assets/blacklist-config.json'
+)
 
 export const chain = getChain()

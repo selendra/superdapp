@@ -1,9 +1,14 @@
 import type { SubstrateBatchProcessor } from '@subsquid/substrate-processor'
 
-import type kusama from './kusama/api'
+import type selendra from './selendra/api'
+
+export interface IBlackListConfing {
+  blacklistItems: string[]
+  argsStringMaxLengthLimit: number
+}
 
 export type ChainApi =
-  | typeof kusama
+  | typeof selendra
 
 export interface ProcessorConfig {
   chainName: string
