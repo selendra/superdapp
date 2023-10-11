@@ -1,29 +1,21 @@
+import { Store } from '@subsquid/typeorm-store'
+import { Keyring } from '@polkadot/api'
 import {
   decodeHex,
-  SubstrateBlock,
   toHex,
+  CommonHandlerContext
 } from '@subsquid/substrate-processor'
-import { encode, decode, registry } from '@subsquid/ss58'
-import { chain } from '../chain'
+import { chain, BLACKLIST_CONFIG } from '../chain'
+import { CounterLevel, ItemsCounter, ItemType } from '../model'
+
+const keyring = new Keyring()
 
 export function encodeAddress(address: Uint8Array) {
-  if (chain.config.prefix) {
-    return encode({
-      bytes: address,
-      prefix: chain.config.prefix,
-    })
-  } else {
-    return toHex(address)
-  }
+  return keyring.encodeAddress(address, chain.config.prefix)
 }
 
 export function decodeAddress(address: string) {
-  if (chain.config.prefix) {
-    return decode(address).bytes
-  }
-  else {
-    return Uint8Array.from(decodeHex(address))
-  }
+  return keyring.decodeAddress(address)
 }
 
 export function getOriginAccountId(origin: any): Uint8Array | undefined {
@@ -78,5 +70,114 @@ export function unwrapData(data: { __kind: string; value?: Uint8Array }) {
       return Buffer.from(data.value!)
         .toString("utf-8")
         .replace(/\u0000/g, "");
+  }
+}
+
+function parseArgsHelper(srcNode: any, res: Set<string>): void {
+  if (!srcNode) return
+
+  const handleVertex = (val: any) => {
+    if (ArrayBuffer.isView(val) && val.constructor.name === 'Uint8Array') {
+      const tr = toHex(val as Uint8Array)
+      if (tr.length <= BLACKLIST_CONFIG.argsStringMaxLengthLimit) res.add(tr)
+      return
+    }
+    if (ArrayBuffer.isView(val) && val.constructor.name !== 'Uint8Array') {
+      const tr = val.toString()
+      if (tr.length <= BLACKLIST_CONFIG.argsStringMaxLengthLimit) res.add(tr)
+      return
+    }
+
+    switch (typeof val) {
+      case 'string':
+        if (
+          val.length > 0 &&
+          val.length <= BLACKLIST_CONFIG.argsStringMaxLengthLimit
+        ) {
+          res.add(val)
+        }
+        break
+      case 'number':
+      case 'bigint':
+        res.add((<any>val).toString())
+        break
+    }
+  }
+
+  if (
+    Array.isArray(srcNode) ||
+    (!Array.isArray(srcNode) &&
+      !ArrayBuffer.isView(srcNode) &&
+      typeof srcNode === 'object')
+  ) {
+    // It's array or object
+    for (const key in srcNode) parseArgsHelper(srcNode[key], res)
+  } else {
+    // It's primitive value
+    handleVertex(srcNode)
+  }
+}
+
+export function getParsedArgs(srcArgs: any): string[] {
+  let result: Set<string> = new Set()
+  parseArgsHelper(srcArgs, result)
+  return [...result.values()]
+}
+
+interface ICounterNameProps {
+  type: ItemType
+  level: CounterLevel
+  palletName?: string
+  itemName?: string
+}
+
+export class ItemsLogger {
+  private static itemsMap = new Map<string, ItemsCounter>()
+  private static initilized = false
+
+  static isInitialized = () => this.initilized
+
+  static async init(ctx: CommonHandlerContext<Store>) {
+    const items = await ctx.store.find(ItemsCounter)
+    for (const item of items) {
+      this.itemsMap.set(item.id, item)
+    }
+    this.initilized = true
+    ctx.log.info('Items counters were initialized')
+  }
+
+  private static _add(item: ICounterNameProps) {
+    const { level, type, palletName, itemName } = item
+    let id = type.toString()
+    if (palletName) id += `.${palletName}`
+    if (itemName) id += `.${itemName}`
+
+    const curState =
+      this.itemsMap.get(id) ?? new ItemsCounter({ id, total: 0, type, level })
+    curState.total += 1
+    this.itemsMap.set(id, curState)
+  }
+
+  private static _addItem(item: Omit<ICounterNameProps, 'level'>) {
+    const { itemName, palletName, type } = item
+    this._add({ type, palletName, itemName, level: CounterLevel.Item })
+    this._add({ type, palletName, level: CounterLevel.Pallet })
+    this._add({ type, level: CounterLevel.Global })
+  }
+
+  static addEvent = (item: Omit<ICounterNameProps, 'level' | 'type'>) =>
+    this._addItem({ type: ItemType.Events, ...item })
+
+  static addCall(
+    item: Omit<ICounterNameProps, 'level' | 'type'>,
+    isMainInExtrinsic: boolean
+  ) {
+    this._addItem({ type: ItemType.Calls, ...item })
+    if (isMainInExtrinsic) this._addItem({ type: ItemType.Extrinsics, ...item })
+  }
+
+  static async saveToDB(ctx: CommonHandlerContext<Store>) {
+    await ctx.store.save([...this.itemsMap.values()])
+    //ctx.log.info('Items counters were saved')
   }
 }

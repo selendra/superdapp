@@ -1,14 +1,14 @@
 [
   {
     "prefix": 2,
-    "network": "kusama",
-    "displayName": "Kusama Relay Chain",
+    "network": "selendra",
+    "displayName": "Selendra Network",
     "symbols": [
-      "KSM"
+      "SEL"
     ],
     "decimals": [
-      12
+      18
     ],
-    "archiveName": "kusama"
+    "archiveName": "selendra"
   }
 ]

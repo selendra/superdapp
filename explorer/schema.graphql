@@ -1,10 +1,139 @@
-type Account @entity {
-    id: ID!
-    transfers: [Transfer!] @derivedFrom(field: "account")
-    rewards: [StakingReward!] @derivedFrom(field: "account")
-    identity: Identity @derivedFrom(field: "account")
-    sub: IdentitySub @derivedFrom(field: "account")
+type Block @entity {
+  id: ID!
+  height: Int! @index
+  hash: String! @index
+  parentHash: String!
+  timestamp: DateTime! @index
+  specVersion: Int! @index
+  validator: String @index
+  extrinsicsCount: Int!
+  callsCount: Int!
+  eventsCount: Int!
+  extrinsics: [Extrinsic]! @derivedFrom(field: "block")
+  calls: [Call]! @derivedFrom(field: "block")
+  events: [Event]! @derivedFrom(field: "block")
 }
+
+
+type Extrinsic @entity {
+  id: ID!
+  block: Block
+  mainCall: Call
+  calls: [Call]! @derivedFrom(field: "extrinsic")
+  events: [Event]! @derivedFrom(field: "extrinsic")
+  blockNumber: Int @index
+  timestamp: DateTime @index
+  extrinsicHash: String @index
+  indexInBlock: Int
+  version: Int @index
+  signerPublicKey: String @index
+  success: Boolean @index
+  error: String
+  tip: BigInt
+  fee: BigInt
+}
+
+type Event @entity @index(fields: ["id","palletName","eventName"]) {
+  "Event id - e.g. 0000000001-000000-272d6"
+  id: ID!
+  block: Block!
+  blockNumber: Int! @index
+  timestamp: DateTime! @index
+  extrinsicHash: String @index
+  extrinsic: Extrinsic
+  call: Call
+  indexInBlock: Int
+  eventName: String! @index
+  palletName: String! @index
+  argsStr: [String]
+}
+
+type Call @entity @index(fields: ["id","palletName","callName"]) {
+  id: ID!
+  parentId: String @index
+  block: Block!
+  extrinsic: Extrinsic
+  extrinsicHash: String @index
+  blockNumber: Int! @index
+  timestamp: DateTime! @index
+  callName: String! @index
+  palletName: String! @index
+  success: Boolean! @index
+  callerPublicKey: String @index
+  argsStr: [String]
+}
+
+enum CounterLevel {
+  Global
+  Pallet
+  Item
+}
+
+enum ItemType {
+  Extrinsics
+  Calls
+  Events
+}
+
+type ItemsCounter @entity {
+  id: ID!
+  type: ItemType! @index
+  level: CounterLevel! @index
+  total: Int! @index
+}
+
+###-------------------------Block Explorer--------------------------###
+
+type Account @entity @index(fields: ["freeBalance", "id"], unique: true) {
+  "Native address"
+  id: ID!
+  evmAddress: String @index
+  freeBalance: BigInt! @index
+  lockedBalance: BigInt!
+  availableBalance: BigInt!
+  reservedBalance: BigInt!
+  vestedBalance: BigInt!
+  votingBalance: BigInt!
+  updatedAt: BigInt!
+  evmContracts: [EvmContract!] @derivedFrom(field: "signer")
+  rewards: [StakingReward!] @derivedFrom(field: "account")
+  identity: Identity @derivedFrom(field: "account")
+  sub: IdentitySub @derivedFrom(field: "account")
+}
+
+type EvmContract @entity @index(fields: ["extrinsic", "id"], unique: true) {
+  "Address"
+  id: ID!
+  extrinsic: Extrinsic!
+  signer: Account!
+  bytecode: String!
+  bytecodeContext: String!
+  bytecodeArguments: String!
+  gasLimit: BigInt!
+  storageLimit: BigInt!
+  verifiedContract: [VerifiedContract!] @derivedFrom(field: "contract")
+  timestamp: DateTime!
+}
+
+type VerifiedContract @entity @index(fields: ["contract", "type"], unique: true) @index(fields: ["contract", "id"], unique: true) {
+  "Address"
+  id: ID!
+  contract: Contract!
+  name: String! @index
+  filename: String @index
+  source: JSON!
+  optimization: Boolean!
+  compilerVersion: String!
+  compiledData: JSON!
+  args: JSON!
+  runs: Int!
+  target: String!
+  type: ContractType @index
+  contractData: JSON
+  license: String
+  timestamp: DateTime @index
+}
+
 
 enum TransferDirection {
     From
@@ -14,20 +143,28 @@ enum TransferDirection {
 # entity for linking account and transfer
 type Transfer @entity {
     id: ID!
-    transfer: NativeTransfer
+    transfer: TokenTransfer
     account: Account!
     direction: TransferDirection
 }
 
-type NativeTransfer @entity {
+type TokenTransfer @entity {
     id: ID!
     blockNumber: Int! @index
     timestamp: DateTime! @index
-    extrinsicHash: String @index
+    extrinsic: Extrinsic!
     from: Account!
     to: Account!
     amount: BigInt! @index
+    type: TransferType!
     success: Boolean!
+}
+
+enum TransferType {
+  Native, 
+  ERC20, 
+  ERC721, 
+  ERC1155
 }
 
 type StakingReward @entity {
