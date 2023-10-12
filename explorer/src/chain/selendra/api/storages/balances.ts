@@ -1,6 +1,7 @@
 import assert from 'assert'
 import {
   BalancesAccountStorage,
+  BalancesLocksStorage,
   BalancesTotalIssuanceStorage,
   SystemAccountStorage
 } from '../../types/storage'
@@ -8,17 +9,17 @@ import { Block, ChainContext } from '../../types/support'
 import { UnknownVersionError } from '../../../../utils'
 
 const getBalancesAccountBalances = {
-  async decode(ctx: ChainContext, block: Block, accounts: Uint8Array[]) {
+  async decode(ctx: ChainContext, block: Block, accounts: Uint8Array) {
     const storage = new BalancesAccountStorage(ctx, block)
     assert(storage.isExists)
 
-    const mapData = (d: { free: bigint; reserved: bigint }) => ({
-      free: d.free,
-      reserved: d.reserved
-    })
-
     if (storage.isV10000) {
-      return storage.getManyAsV10000(accounts).then((data) => data.map(mapData))
+      const account = await storage.getAsV10000(accounts)
+
+      return {
+        free: account.free,
+        reserved: account.reserved
+      }
     } else {
       throw new UnknownVersionError(storage.constructor.name)
     }
@@ -26,17 +27,17 @@ const getBalancesAccountBalances = {
 }
 
 const getSystemAccountBalances = {
-  async decode(ctx: ChainContext, block: Block, accounts: Uint8Array[]) {
+  async decode(ctx: ChainContext, block: Block, accounts: Uint8Array) {
     const storage = new SystemAccountStorage(ctx, block)
     assert(storage.isExists)
 
-    const mapData = (d: { data: { free: bigint; reserved: bigint } }) => ({
-      free: d.data.free,
-      reserved: d.data.reserved
-    })
-
     if (storage.isV10000) {
-      return storage.getManyAsV10000(accounts).then((data) => data.map(mapData))
+      const account = (await storage.getAsV10000(accounts)).data
+      
+      return {
+        free: account.free,
+        reserved: account.reserved
+      }
     } else {
       throw new UnknownVersionError(storage.constructor.name)
     }
@@ -56,9 +57,8 @@ const getTotalIssuance = {
   }
 }
 
-
 export default {
   getTotalIssuance,
   getSystemAccountBalances,
-  getBalancesAccountBalances
+  getBalancesAccountBalances,
 }

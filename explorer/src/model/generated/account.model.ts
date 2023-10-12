@@ -26,22 +26,13 @@ export class Account {
   freeBalance!: bigint
 
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  lockedBalance!: bigint
-
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  availableBalance!: bigint
-
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   reservedBalance!: bigint
 
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  vestedBalance!: bigint
+  totalBalance!: bigint
 
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  votingBalance!: bigint
-
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  updatedAt!: bigint
+  @Column_("int4", {nullable: true})
+  updatedAt!: number | undefined | null
 
   @OneToMany_(() => EvmContract, e => e.signer)
   evmContracts!: EvmContract[]
