@@ -6,8 +6,7 @@ import { Account } from "../model";
 import { Action } from "../action/base";
 import { EnsureAccount, TransferAction } from "../action";
 
-
-processor.run(new TypeormDatabase(), async (ctx) => {
+export async function process(ctx: any) {
   const actions: Action[] = [];
 
   for (const { items, header } of ctx.blocks) {
@@ -20,29 +19,22 @@ processor.run(new TypeormDatabase(), async (ctx) => {
           );
 
           const fromId = encodeAddress(data.from);
-          const from = ctx.store.get(Account, {
-            where: { id: fromId },
-          });
-
           const toId = encodeAddress(data.to);
-          const to = ctx.store.get(Account, { where: { id: toId } });
 
           actions.push(
             new EnsureAccount(header, item.event.extrinsic, {
-              account: () => from,
               id: fromId,
             }),
             new EnsureAccount(header, item.event.extrinsic, {
-              account: () => to,
               id: toId,
             }),
-            // new TransferAction(header, item.event.extrinsic, {
-            //   id: item.event.id,
-            //   fromId,
-            //   toId,
-            //   amount: data.amount,
-            //   success: true,
-            // })
+             new TransferAction(header, item.event.extrinsic, {
+              id: item.event.id,
+              fromId,
+              toId,
+              amount: data.amount,
+              success: true,
+            })
           );
           break;
         }
@@ -51,6 +43,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
   }
 
   await Action.process(ctx, actions);
-});
+}
+
 
 

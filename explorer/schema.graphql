@@ -1,3 +1,5 @@
+# =============== Block ===================
+
 type Block @entity {
   id: ID!
   height: Int! @index
@@ -13,7 +15,6 @@ type Block @entity {
   calls: [Call]! @derivedFrom(field: "block")
   events: [Event]! @derivedFrom(field: "block")
 }
-
 
 type Extrinsic @entity {
   id: ID!
@@ -63,18 +64,6 @@ type Call @entity @index(fields: ["id","palletName","callName"]) {
   argsStr: [String]
 }
 
-enum CounterLevel {
-  Global
-  Pallet
-  Item
-}
-
-enum ItemType {
-  Extrinsics
-  Calls
-  Events
-}
-
 type ItemsCounter @entity {
   id: ID!
   type: ItemType! @index
@@ -82,19 +71,16 @@ type ItemsCounter @entity {
   total: Int! @index
 }
 
-###-------------------------Block Explorer--------------------------###
+# =============== Account ===================
 
 type Account @entity @index(fields: ["freeBalance", "id"], unique: true) {
   "Native address"
   id: ID!
   evmAddress: String @index
   freeBalance: BigInt! @index
-  lockedBalance: BigInt!
-  availableBalance: BigInt!
   reservedBalance: BigInt!
-  vestedBalance: BigInt!
-  votingBalance: BigInt!
-  updatedAt: BigInt!
+  totalBalance: BigInt!
+  updatedAt: Int
   evmContracts: [EvmContract!] @derivedFrom(field: "signer")
   rewards: [StakingReward!] @derivedFrom(field: "account")
   identity: Identity @derivedFrom(field: "account")
@@ -115,10 +101,12 @@ type EvmContract @entity @index(fields: ["extrinsic", "id"], unique: true) {
   timestamp: DateTime!
 }
 
+# =============== Contract verification ===================
+
 type VerifiedContract @entity @index(fields: ["contract", "type"], unique: true) @index(fields: ["contract", "id"], unique: true) {
   "Address"
   id: ID!
-  contract: Contract!
+  contract: EvmContract!
   name: String! @index
   filename: String @index
   source: JSON!
@@ -134,17 +122,14 @@ type VerifiedContract @entity @index(fields: ["contract", "type"], unique: true)
   timestamp: DateTime @index
 }
 
-
-enum TransferDirection {
-    From
-    To
-}
+# =============== Transfer ===================
 
 # entity for linking account and transfer
 type Transfer @entity {
     id: ID!
     transfer: TokenTransfer
     account: Account!
+    denom: String @index
     direction: TransferDirection
 }
 
@@ -160,12 +145,7 @@ type TokenTransfer @entity {
     success: Boolean!
 }
 
-enum TransferType {
-  Native, 
-  ERC20, 
-  ERC721, 
-  ERC1155
-}
+# =============== Staking ===================
 
 type StakingReward @entity {
     id: ID!
@@ -178,19 +158,11 @@ type StakingReward @entity {
     validatorId: ID
 }
 
+# =============== Identity ===================
+
 type IdentityAdditionalField {
     name: String
     value: String
-}
-
-enum Judgement {
-    Unknown
-    FeePaid
-    Reasonable
-    KnownGood
-    OutOfDate
-    LowQuality
-    Erroneous
 }
 
 type Identity @entity {
@@ -215,4 +187,50 @@ type IdentitySub @entity {
     super: Identity
     account: Account! @unique
     name: String
+}
+
+# ===================== Enums =============================
+
+enum ContractType {
+  ERC20, 
+  ERC721, 
+  ERC1155,
+  other
+}
+
+enum Judgement {
+    Unknown
+    FeePaid
+    Reasonable
+    KnownGood
+    OutOfDate
+    LowQuality
+    Erroneous
+}
+
+enum TransferType {
+  Native, 
+  ERC20, 
+  ERC721, 
+  ERC1155,
+  SRC20, 
+  SRC721, 
+  SRC1155
+}
+
+enum TransferDirection {
+    From
+    To
+}
+
+enum CounterLevel {
+  Global
+  Pallet
+  Item
+}
+
+enum ItemType {
+  Extrinsics
+  Calls
+  Events
 }

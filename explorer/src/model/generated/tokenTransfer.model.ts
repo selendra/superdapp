@@ -1,10 +1,12 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, ManyToOne as ManyToOne_} from "typeorm"
 import * as marshal from "./marshal"
+import {Extrinsic} from "./extrinsic.model"
 import {Account} from "./account.model"
+import {TransferType} from "./_transferType"
 
 @Entity_()
-export class NativeTransfer {
-  constructor(props?: Partial<NativeTransfer>) {
+export class TokenTransfer {
+  constructor(props?: Partial<TokenTransfer>) {
     Object.assign(this, props)
   }
 
@@ -20,8 +22,8 @@ export class NativeTransfer {
   timestamp!: Date
 
   @Index_()
-  @Column_("text", {nullable: true})
-  extrinsicHash!: string | undefined | null
+  @ManyToOne_(() => Extrinsic, {nullable: true})
+  extrinsic!: Extrinsic
 
   @Index_()
   @ManyToOne_(() => Account, {nullable: true})
@@ -34,6 +36,9 @@ export class NativeTransfer {
   @Index_()
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   amount!: bigint
+
+  @Column_("varchar", {length: 7, nullable: false})
+  type!: TransferType
 
   @Column_("bool", {nullable: false})
   success!: boolean

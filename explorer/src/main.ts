@@ -1,7 +1,8 @@
 import { processor} from './processor'
 import { TypeormDatabase } from '@subsquid/typeorm-store'
-import { blockHandler } from './handler'
+import { blockHandler, balanceHandler } from './handler'
 
 processor.run(new TypeormDatabase(), async (ctx) => {
-  await blockHandler.processBlock(ctx)
+  await blockHandler.process(ctx)
+  await balanceHandler.process(ctx)
 })

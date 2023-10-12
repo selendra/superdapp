@@ -27,7 +27,7 @@ export abstract class Action<T = unknown> {
     protected performed = false
 
     constructor(
-        readonly block: Pick<SubstrateBlock,  'id' | 'hash' | 'height' | 'timestamp'>,
+        readonly block: SubstrateBlock,
         readonly extrinsic: Pick<SubstrateExtrinsic, 'id' | 'hash'> | undefined,
         readonly data: T
     ) {}
@@ -43,7 +43,7 @@ export abstract class Action<T = unknown> {
 
 export class LazyAction extends Action {
     constructor(
-        readonly block: Pick<SubstrateBlock, 'id' | 'hash' | 'height' | 'timestamp'>,
+        readonly block: SubstrateBlock,
         readonly extrinsic: Pick<SubstrateExtrinsic, 'id' | 'hash'> | undefined,
         readonly cb: (ctx: ProcessorContext) => Promise<Action[]>
     ) {

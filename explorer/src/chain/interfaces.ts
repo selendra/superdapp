@@ -16,6 +16,7 @@ export interface ProcessorConfig {
   prefix?: number
   blockRange?: Parameters<SubstrateBatchProcessor<any>['setBlockRange']>[0],
   typesBundle?: Parameters<SubstrateBatchProcessor<any>['setTypesBundle']>[0]
+  symbols?: string | "UNIT"
 }
 
 export interface IChainData {

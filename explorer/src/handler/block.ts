@@ -3,7 +3,7 @@ import { getParsedArgs, ItemsLogger } from '../utils'
 import { BLACKLIST_CONFIG } from '../chain'
 import { CallItem } from '../processor'
 
-export async function processBlock(ctx: any) {
+export async function process(ctx: any) {
   const entitiesStore = new Map<
     'block' | 'event' | 'call' | 'extrinsic',
     Map<string, BlockEntity | Event | Call | Extrinsic>

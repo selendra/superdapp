@@ -1,7 +1,8 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_} from "typeorm"
 import * as marshal from "./marshal"
 import {Extrinsic} from "./extrinsic.model"
 import {Account} from "./account.model"
+import {VerifiedContract} from "./verifiedContract.model"
 
 @Index_(["extrinsic", "id"], {unique: true})
 @Entity_()
@@ -37,6 +38,9 @@ export class EvmContract {
 
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
   storageLimit!: bigint
+
+  @OneToMany_(() => VerifiedContract, e => e.contract)
+  verifiedContract!: VerifiedContract[]
 
   @Column_("timestamp with time zone", {nullable: false})
   timestamp!: Date
