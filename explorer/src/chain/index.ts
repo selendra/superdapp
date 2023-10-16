@@ -37,7 +37,7 @@ function getChain(): { api: ChainApi; config: ProcessorConfig } {
     },
     prefix: chainConfig.prefix,
     blockRange: {
-      from: 0
+      from: 705300
     },
   }
 

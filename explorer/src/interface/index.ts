@@ -14,3 +14,7 @@ export interface TransferData {
   amount: bigint
   success: boolean
 }
+
+export interface ContractData {
+  item: any,
+}
