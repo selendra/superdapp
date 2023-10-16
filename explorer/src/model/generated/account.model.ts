@@ -1,6 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, OneToMany as OneToMany_, OneToOne as OneToOne_} from "typeorm"
 import * as marshal from "./marshal"
-import {EvmContract} from "./evmContract.model"
 import {StakingReward} from "./stakingReward.model"
 import {Identity} from "./identity.model"
 import {IdentitySub} from "./identitySub.model"
@@ -33,9 +32,6 @@ export class Account {
 
   @Column_("int4", {nullable: true})
   updatedAt!: number | undefined | null
-
-  @OneToMany_(() => EvmContract, e => e.signer)
-  evmContracts!: EvmContract[]
 
   @OneToMany_(() => StakingReward, e => e.account)
   rewards!: StakingReward[]

@@ -14,15 +14,11 @@ export class TransferAction extends Action<TransferData> {
       where: { id: this.data.toId },
     });
 
-    let extrinsic = await ctx.store.findOneOrFail(Extrinsic, {
-        where: { extrinsicHash: this.extrinsic?.hash },
-      })
-
     let transfer = new TokenTransfer({
       id: this.data.id,
       blockNumber: this.block.height,
       timestamp: new Date(this.block.timestamp),
-      extrinsic: extrinsic,
+      extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash: '0x',
       from,
       to,
       amount: this.data.amount,

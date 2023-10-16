@@ -1,4 +1,0 @@
-src/process/account/action/account.ts(3,18): error TS2305: Module '"./base"' has no exported member 'ActionContext'.
-src/process/account/action/identity.ts(8,18): error TS2305: Module '"./base"' has no exported member 'ActionContext'.
-src/process/account/action/reward.ts(2,18): error TS2305: Module '"./base"' has no exported member 'ActionContext'.
-src/process/account/action/transfer.ts(7,18): error TS2305: Module '"./base"' has no exported member 'ActionContext'.

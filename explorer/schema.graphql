@@ -81,24 +81,21 @@ type Account @entity @index(fields: ["freeBalance", "id"], unique: true) {
   reservedBalance: BigInt!
   totalBalance: BigInt!
   updatedAt: Int
-  evmContracts: [EvmContract!] @derivedFrom(field: "signer")
   rewards: [StakingReward!] @derivedFrom(field: "account")
   identity: Identity @derivedFrom(field: "account")
   sub: IdentitySub @derivedFrom(field: "account")
 }
 
-type EvmContract @entity @index(fields: ["extrinsic", "id"], unique: true) {
+type EvmContract @entity {
   "Address"
   id: ID!
-  extrinsic: Extrinsic!
+  extrinsicHash: String!
   signer: Account!
   bytecode: String!
   bytecodeContext: String!
   bytecodeArguments: String!
-  gasLimit: BigInt!
-  storageLimit: BigInt!
-  verifiedContract: [VerifiedContract!] @derivedFrom(field: "contract")
-  timestamp: DateTime!
+  type: String! @index
+  timestamp: Int
 }
 
 # =============== Contract verification ===================
@@ -116,7 +113,7 @@ type VerifiedContract @entity @index(fields: ["contract", "type"], unique: true)
   args: JSON!
   runs: Int!
   target: String!
-  type: ContractType @index
+  type: String! @index
   contractData: JSON
   license: String
   timestamp: DateTime @index
@@ -137,7 +134,7 @@ type TokenTransfer @entity {
     id: ID!
     blockNumber: Int! @index
     timestamp: DateTime! @index
-    extrinsic: Extrinsic!
+    extrinsicHash: String!
     from: Account!
     to: Account!
     amount: BigInt! @index
@@ -190,13 +187,6 @@ type IdentitySub @entity {
 }
 
 # ===================== Enums =============================
-
-enum ContractType {
-  ERC20, 
-  ERC721, 
-  ERC1155,
-  other
-}
 
 enum Judgement {
     Unknown

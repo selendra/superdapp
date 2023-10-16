@@ -1,5 +1,6 @@
 import assert from 'assert'
 import {Chain, ChainContext, EventContext, Event, Result} from './support'
+import * as v10000 from './v10000'
 
 export class BalancesTransferEvent {
   private readonly _chain: Chain
@@ -25,6 +26,64 @@ export class BalancesTransferEvent {
    * Transfer succeeded.
    */
   get asV10000(): {from: Uint8Array, to: Uint8Array, amount: bigint} {
+    assert(this.isV10000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class EvmLogEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'EVM.Log')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Ethereum events from contracts.
+   */
+  get isV10000(): boolean {
+    return this._chain.getEventHash('EVM.Log') === '4edddb5632dcffc943bfbdb42201f95b9c2ffa1df042e526a7c54a39f099056a'
+  }
+
+  /**
+   * Ethereum events from contracts.
+   */
+  get asV10000(): {log: v10000.Log} {
+    assert(this.isV10000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class EthereumExecutedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Ethereum.Executed')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * An ethereum transaction was successfully executed.
+   */
+  get isV10000(): boolean {
+    return this._chain.getEventHash('Ethereum.Executed') === '4da35f3b1cb63c6084839486f6cc44465f31d4dbf24abce9ef5d05b899d9309e'
+  }
+
+  /**
+   * An ethereum transaction was successfully executed.
+   */
+  get asV10000(): {from: Uint8Array, to: Uint8Array, transactionHash: Uint8Array, exitReason: v10000.ExitReason, extraData: Uint8Array} {
     assert(this.isV10000)
     return this._chain.decodeEvent(this.event)
   }

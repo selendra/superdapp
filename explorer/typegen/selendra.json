@@ -7,7 +7,9 @@
         "Identity.IdentityCleared",
         "Identity.IdentityKilled",
         "Identity.SubIdentityRemoved",
-        "Identity.SubIdentityRevoked"
+        "Identity.SubIdentityRevoked", 
+        "Ethereum.Executed",
+        "EVM.Log"
     ],
     "calls": [
         "Balances.transfer",

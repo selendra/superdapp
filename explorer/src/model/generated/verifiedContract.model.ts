@@ -1,6 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
 import {EvmContract} from "./evmContract.model"
-import {ContractType} from "./_contractType"
 
 @Index_(["contract", "type"], {unique: true})
 @Index_(["contract", "id"], {unique: true})
@@ -49,8 +48,8 @@ export class VerifiedContract {
   target!: string
 
   @Index_()
-  @Column_("varchar", {length: 7, nullable: true})
-  type!: ContractType | undefined | null
+  @Column_("text", {nullable: false})
+  type!: string
 
   @Column_("jsonb", {nullable: true})
   contractData!: unknown | undefined | null

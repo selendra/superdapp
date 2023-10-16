@@ -1,6 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, ManyToOne as ManyToOne_} from "typeorm"
 import * as marshal from "./marshal"
-import {Extrinsic} from "./extrinsic.model"
 import {Account} from "./account.model"
 import {TransferType} from "./_transferType"
 
@@ -21,9 +20,8 @@ export class TokenTransfer {
   @Column_("timestamp with time zone", {nullable: false})
   timestamp!: Date
 
-  @Index_()
-  @ManyToOne_(() => Extrinsic, {nullable: true})
-  extrinsic!: Extrinsic
+  @Column_("text", {nullable: false})
+  extrinsicHash!: string
 
   @Index_()
   @ManyToOne_(() => Account, {nullable: true})
