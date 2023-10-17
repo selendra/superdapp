@@ -1,5 +1,5 @@
-module.exports = class Data1697428323563 {
-    name = 'Data1697428323563'
+module.exports = class Data1697506527708 {
+    name = 'Data1697506527708'
 
     async up(db) {
         await db.query(`CREATE TABLE "call" ("id" character varying NOT NULL, "parent_id" text, "extrinsic_hash" text, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "call_name" text NOT NULL, "pallet_name" text NOT NULL, "success" boolean NOT NULL, "caller_public_key" text, "args_str" text array, "block_id" character varying, "extrinsic_id" character varying, CONSTRAINT "PK_2098af0169792a34f9cfdd39c47" PRIMARY KEY ("id"))`)
@@ -55,8 +55,7 @@ module.exports = class Data1697428323563 {
         await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "evm_address" text, "free_balance" numeric NOT NULL, "reserved_balance" numeric NOT NULL, "total_balance" numeric NOT NULL, "updated_at" integer, CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_22bbd4c1019b6727a8c0660b87" ON "account" ("evm_address") `)
         await db.query(`CREATE UNIQUE INDEX "IDX_c7fe67b0a7b07c7e592fdb4763" ON "account" ("free_balance", "id") `)
-        await db.query(`CREATE TABLE "evm_contract" ("id" character varying NOT NULL, "extrinsic_hash" text NOT NULL, "bytecode" text NOT NULL, "bytecode_context" text NOT NULL, "bytecode_arguments" text NOT NULL, "type" text NOT NULL, "timestamp" integer, "signer_id" character varying, CONSTRAINT "PK_b96d2e55892972f43bab117bf13" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE INDEX "IDX_afe28a5e71815101d97b1f64ac" ON "evm_contract" ("signer_id") `)
+        await db.query(`CREATE TABLE "evm_contract" ("id" character varying NOT NULL, "extrinsic_hash" text NOT NULL, "account" text NOT NULL, "bytecode" text NOT NULL, "bytecode_context" text NOT NULL, "bytecode_arguments" text NOT NULL, "type" text NOT NULL, "timestamp" integer, CONSTRAINT "PK_b96d2e55892972f43bab117bf13" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_cd330ac07d69e10addb9c30970" ON "evm_contract" ("type") `)
         await db.query(`CREATE TABLE "verified_contract" ("id" character varying NOT NULL, "name" text NOT NULL, "filename" text, "source" jsonb NOT NULL, "optimization" boolean NOT NULL, "compiler_version" text NOT NULL, "compiled_data" jsonb NOT NULL, "args" jsonb NOT NULL, "runs" integer NOT NULL, "target" text NOT NULL, "type" text NOT NULL, "contract_data" jsonb, "license" text, "timestamp" TIMESTAMP WITH TIME ZONE, "contract_id" character varying, CONSTRAINT "PK_f0ff6f230d652bc4608f4f2d2e3" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_f5cb550e3c99f83463c201d52c" ON "verified_contract" ("name") `)
@@ -86,7 +85,6 @@ module.exports = class Data1697428323563 {
         await db.query(`ALTER TABLE "identity_sub" ADD CONSTRAINT "FK_b3110339d38dddff279f6f77127" FOREIGN KEY ("super_id") REFERENCES "identity"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "identity_sub" ADD CONSTRAINT "FK_20df08516f386a2d403fe66150a" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "identity" ADD CONSTRAINT "FK_bafa9e6c71c3f69cef6602a8095" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
-        await db.query(`ALTER TABLE "evm_contract" ADD CONSTRAINT "FK_afe28a5e71815101d97b1f64ac4" FOREIGN KEY ("signer_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "verified_contract" ADD CONSTRAINT "FK_70c992c058f4f82d658a2cd899c" FOREIGN KEY ("contract_id") REFERENCES "evm_contract"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "token_transfer" ADD CONSTRAINT "FK_f62ce2d807e8c6ce2651d2ebf97" FOREIGN KEY ("from_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "token_transfer" ADD CONSTRAINT "FK_f272327358edf76901e129ac317" FOREIGN KEY ("to_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -149,7 +147,6 @@ module.exports = class Data1697428323563 {
         await db.query(`DROP INDEX "public"."IDX_22bbd4c1019b6727a8c0660b87"`)
         await db.query(`DROP INDEX "public"."IDX_c7fe67b0a7b07c7e592fdb4763"`)
         await db.query(`DROP TABLE "evm_contract"`)
-        await db.query(`DROP INDEX "public"."IDX_afe28a5e71815101d97b1f64ac"`)
         await db.query(`DROP INDEX "public"."IDX_cd330ac07d69e10addb9c30970"`)
         await db.query(`DROP TABLE "verified_contract"`)
         await db.query(`DROP INDEX "public"."IDX_f5cb550e3c99f83463c201d52c"`)
@@ -179,7 +176,6 @@ module.exports = class Data1697428323563 {
         await db.query(`ALTER TABLE "identity_sub" DROP CONSTRAINT "FK_b3110339d38dddff279f6f77127"`)
         await db.query(`ALTER TABLE "identity_sub" DROP CONSTRAINT "FK_20df08516f386a2d403fe66150a"`)
         await db.query(`ALTER TABLE "identity" DROP CONSTRAINT "FK_bafa9e6c71c3f69cef6602a8095"`)
-        await db.query(`ALTER TABLE "evm_contract" DROP CONSTRAINT "FK_afe28a5e71815101d97b1f64ac4"`)
         await db.query(`ALTER TABLE "verified_contract" DROP CONSTRAINT "FK_70c992c058f4f82d658a2cd899c"`)
         await db.query(`ALTER TABLE "token_transfer" DROP CONSTRAINT "FK_f62ce2d807e8c6ce2651d2ebf97"`)
         await db.query(`ALTER TABLE "token_transfer" DROP CONSTRAINT "FK_f272327358edf76901e129ac317"`)

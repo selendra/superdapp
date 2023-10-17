@@ -1,9 +1,4 @@
-import { TypeormDatabase } from '@subsquid/typeorm-store'
-import { processor } from '../processor'
-import { encodeAddress } from '../utils'
-import { chain } from '../chain'
-import { EvmContract } from '../model'
-import { EnsureEvmContract } from '../action'
+import { EnsureEvmContract, EnsureEvmAccount, evmContractTransfer } from '../action'
 import { Action } from '../action/base'
 
 export async function process(ctx: any) {
@@ -15,8 +10,14 @@ export async function process(ctx: any) {
         switch (item.name) {
           case 'Ethereum.Executed': {
             actions.push(
+              new EnsureEvmAccount(header, item.event.extrinsic, {
+                item: item
+              }),
               new EnsureEvmContract(header, item.event.extrinsic, {
-                item: item,
+                item: item
+              }),
+              new evmContractTransfer(header, item.event.extrinsic, {
+                item: item
               })
             )
             break
