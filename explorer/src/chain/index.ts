@@ -35,7 +35,7 @@ function getChain(): { api: ChainApi; config: ProcessorConfig } {
       archive: 'https://archive-graphql.selendra.org/graphql',
       chain: 'wss://rpc1.selendra.org'
     },
-    prefix: chainConfig.prefix,
+    prefix: chainConfig.prefix ? chainConfig.prefix: 42,
     blockRange: {
       from: 705300
     },

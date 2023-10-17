@@ -2,7 +2,14 @@ import { chain } from "../chain";
 import { Account, TokenTransfer, Transfer, TransferDirection, Extrinsic, TransferType } from "../model";
 import { ProcessorContext } from "../processor";
 import { Action } from "./base";
-import { TransferData } from '../interface'
+
+export interface TransferData {
+  id: string
+  fromId: string
+  toId: string
+  amount: bigint
+  success: boolean
+}
 
 export class TransferAction extends Action<TransferData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {

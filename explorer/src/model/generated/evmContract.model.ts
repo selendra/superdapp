@@ -1,5 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
-import {Account} from "./account.model"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_} from "typeorm"
 
 @Entity_()
 export class EvmContract {
@@ -16,9 +15,8 @@ export class EvmContract {
   @Column_("text", {nullable: false})
   extrinsicHash!: string
 
-  @Index_()
-  @ManyToOne_(() => Account, {nullable: true})
-  signer!: Account
+  @Column_("text", {nullable: false})
+  account!: string
 
   @Column_("text", {nullable: false})
   bytecode!: string

@@ -90,7 +90,7 @@ type EvmContract @entity {
   "Address"
   id: ID!
   extrinsicHash: String!
-  signer: Account!
+  account: String!
   bytecode: String!
   bytecodeContext: String!
   bytecodeArguments: String!
