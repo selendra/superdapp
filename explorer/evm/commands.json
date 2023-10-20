@@ -40,13 +40,14 @@
       "description": "Generate TypeORM entities from the schema file",
       "cmd": ["squid-typeorm-codegen"]
     },
-    "typegen": {
-      "description": "Generate data access classes for an substrate metadata",
-      "cmd": ["squid-substrate-typegen", {"glob": "./typegen/*.json"}]
-    },
     "typegen:evm": {
       "description": "Generate data access classes for contract abi",
       "cmd": ["squid-evm-typegen", "./src/abi", "--clean", {"glob": "./abi/*.json"}]
+    },
+    "typegen": {
+      "deps": ["typegen:evm"],
+      "description": "Generate data access classes for an substrate metadata",
+      "cmd": ["squid-substrate-typegen", "./typegen.json"]
     },
     "process": {
       "description": "Load .env and start the squid processor",

@@ -1,4 +1,19 @@
+import { Contract as Erc1155Contract } from '../abi/erc1155'
+import { Contract as Erc20Contract } from '../abi/erc20'
+import { Contract as Erc721Contract } from '../abi/erc721'
+import { ProcessorContext } from '../processor'
+import { addTimeout } from '@subsquid/util-timeout';
+import { } from '../model'
+import { contractCallTimeout } from '../chain';
+
 export type ContractType = 'ERC20' | 'ERC721' | 'ERC1155' | 'unknown';
+
+export type TokenDetails = {
+  name: string | null;
+  symbol: string | null;
+  decimals: number | null;
+  uri: string | null;
+};
 
 export const CONTRACT_METHODS: {
   [method: string]: string[];
@@ -35,3 +50,153 @@ export const CONTRACT_METHODS: {
     'onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)',
   ],
 };
+
+export function getContractErc1155(
+  ctx: ProcessorContext,
+  contractAddress: string,
+  block: number
+): Erc1155Contract {
+  return new Erc1155Contract(
+    { _chain: ctx._chain, block: { height: block } },
+    contractAddress
+  )
+}
+
+export function getContractErc20(
+  ctx: ProcessorContext,
+  contractAddress: string,
+  block: number
+): Erc20Contract {
+  return new Erc20Contract(
+    { _chain: ctx._chain, block: { height: block } },
+    contractAddress
+  )
+}
+
+export function getContractErc721(
+  ctx: ProcessorContext,
+  contractAddress: string,
+  block: number
+): Erc721Contract {
+  return new Erc721Contract(
+    { _chain: ctx._chain, block: { height: block } },
+    contractAddress
+  )
+}
+
+function clearNullBytes(rawStr: string): string {
+  /**
+   * We need replace null byte in string value to prevent error:
+   * "QueryFailedError: invalid byte sequence for encoding \"UTF8\": 0x00\n    at PostgresQueryRunner.query ..."
+   */
+  return rawStr ? rawStr.replace(/\0/g, '') : rawStr;
+}
+
+function getDecoratedCallResult(rawValue: string | null): string | null {
+  const decoratedValue: string | null = rawValue;
+
+  if (!rawValue || typeof rawValue !== 'string') return null;
+
+  const regex = new RegExp(/^\d{10}\.[\d|\w]{4}$/);
+
+  /**
+   * This test is required for contract call results
+   * like this - "0006648936.1ec7" which must be saved as null
+   */
+  if (regex.test(rawValue)) return null;
+
+  return decoratedValue ? clearNullBytes(decoratedValue) : decoratedValue;
+}
+
+
+export async function getTokenDetails({
+  tokenId = null,
+  contractAddress,
+  contractStandard,
+  ctx,
+  block
+}: {
+  tokenId?: bigint | null;
+  contractAddress: string;
+  contractStandard: ContractType;
+  ctx: ProcessorContext;
+  block: number
+}): Promise<TokenDetails> {
+  let contractInst = null;
+  switch (contractStandard) {
+    case "ERC20":
+      contractInst = getContractErc20(
+        ctx,
+        contractAddress,
+        block
+      );
+      break;
+    case 'ERC721' :
+      contractInst = getContractErc721(
+        ctx,
+        contractAddress,
+        block
+      );
+      break;
+    case 'ERC1155':
+      contractInst = getContractErc1155(
+        ctx,
+        contractAddress,
+        block
+      );
+      break;
+    default:
+  }
+
+  if (!contractInst) throw new Error('contractInst is null');
+
+  let name: string | null = null;
+  let symbol: string | null = null;
+  let decimals: number | null = null;
+  let uri: string | null = null;
+
+  try {
+    name =
+      'name' in contractInst
+        ? await addTimeout(contractInst.name(), contractCallTimeout)
+        : null;
+  } catch (e) {
+    console.log(e);
+  }
+  try {
+    symbol =
+      'symbol' in contractInst
+        ? await addTimeout(contractInst.symbol(), contractCallTimeout)
+        : null;
+  } catch (e) {
+    console.log(e);
+  }
+  try {
+    decimals =
+      'decimals' in contractInst
+        ? await addTimeout(contractInst.decimals(), contractCallTimeout)
+        : null;
+  } catch (e) {
+    console.log(e);
+  }
+  try {
+    if ('uri' in contractInst && tokenId) {
+      uri = clearNullBytes(
+        await addTimeout(contractInst.uri(tokenId), contractCallTimeout)
+      );
+    } else if ('tokenURI' in contractInst && tokenId) {
+      uri = clearNullBytes(
+        await addTimeout(contractInst.tokenURI(tokenId), contractCallTimeout)
+      );
+    }
+  } catch (e) {
+    console.log(e);
+  }
+
+  return {
+    symbol: getDecoratedCallResult(symbol),
+    name: getDecoratedCallResult(name),
+    decimals,
+    uri
+  };
+}
