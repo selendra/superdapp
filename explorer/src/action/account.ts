@@ -74,7 +74,6 @@ export class EnsureEvmAccount extends Action<EvmAccountData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
 
     const signer = await this.data.item.event.args.from
-
     const substrateAddress = this.getSubstrateAddress(signer)
 
     const balance = await this.getBalances(ctx, this.block, substrateAddress)

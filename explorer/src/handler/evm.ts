@@ -1,5 +1,7 @@
-import { EnsureEvmContract, EnsureEvmAccount, evmContractTransfer } from '../action'
+import { EnsureEvmContract, EnsureEvmAccount, evmContractErc20 } from '../action'
 import { Action } from '../action/base'
+import * as erc20 from '../abi/erc20'
+import * as erc721 from '../abi/erc721'
 
 export async function process(ctx: any) {
   const actions: Action[] = []
@@ -15,11 +17,20 @@ export async function process(ctx: any) {
               }),
               new EnsureEvmContract(header, item.event.extrinsic, {
                 item: item
-              }),
-              new evmContractTransfer(header, item.event.extrinsic, {
-                item: item
               })
             )
+            break
+          }
+          case 'EVM.Log': {
+            switch ((item.event.args.log || item.event.args).topics[0]) {
+              case erc20.events.Transfer.topic:
+              case erc721.events.Transfer.topic:
+                actions.push(
+                  new evmContractErc20(header, item.event.extrinsic, {
+                    item: item
+                  }),
+                )
+            }
             break
           }
         }

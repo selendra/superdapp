@@ -652,6 +652,18 @@
     easy-table "^1.2.0"
     sync-fetch "^0.5.2"
 
+"@subsquid/evm-typegen@^3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@subsquid/evm-typegen/-/evm-typegen-3.2.2.tgz#254143ea0812600fa677a2051291c228e2601593"
+  integrity sha512-DzjzUwjJNJM74skZCuYPMKYhvDg2KLRdt1ooiOpgH91zEmcS8wx70dtdOtQxDIDm1Bbt/pfS3Yntq7CjbeI2/g==
+  dependencies:
+    "@subsquid/http-client" "^1.2.0"
+    "@subsquid/logger" "^1.3.0"
+    "@subsquid/util-internal" "^2.4.0"
+    "@subsquid/util-internal-code-printer" "^1.2.0"
+    "@subsquid/util-internal-commander" "^1.3.0"
+    commander "^11.0.0"
+
 "@subsquid/graphiql-console@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@subsquid/graphiql-console/-/graphiql-console-0.3.0.tgz#415d305f1b7df7f737c788a3311cfa3179b6dbd1"
@@ -686,6 +698,15 @@
     pg "^8.9.0"
     ws "^8.12.0"
 
+"@subsquid/http-client@^1.2.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@subsquid/http-client/-/http-client-1.3.0.tgz#618705577c55329c4dd3df55a696c6f853f59d42"
+  integrity sha512-GV31imnZf1dYsbZmuXyIMtdSYtVSm06m05T0fjl+ilnOQRvafAx1rMmKVy9INksZwssVQZ/9EHC+Wy8DPw8Oeg==
+  dependencies:
+    "@subsquid/logger" "^1.3.0"
+    "@subsquid/util-internal" "^2.5.1"
+    node-fetch "^3.3.1"
+
 "@subsquid/logger@^0.2.0":
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@subsquid/logger/-/logger-0.2.0.tgz#01857f2860106bc98587ff3efb2a21710b853f3d"
@@ -702,6 +723,15 @@
   dependencies:
     "@subsquid/util-internal-hex" "^0.0.2"
     "@subsquid/util-internal-json" "^0.2.1"
+    supports-color "^8.1.1"
+
+"@subsquid/logger@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@subsquid/logger/-/logger-1.3.0.tgz#2552a95c6ad5737684412eb90cf28b6c026966ed"
+  integrity sha512-1aCaFzGXrzW4bioiv6hPX+vsKO2EsiqFKcWedRW9G+0nnelAfhw5lGsyCvMzfkuk2xUCRA6vWwOReVK3BPW0Zg==
+  dependencies:
+    "@subsquid/util-internal-hex" "^1.2.0"
+    "@subsquid/util-internal-json" "^1.2.0"
     supports-color "^8.1.1"
 
 "@subsquid/openreader@^3.1.0", "@subsquid/openreader@^3.1.2", "@subsquid/openreader@^3.1.7":
@@ -913,10 +943,20 @@
   resolved "https://registry.yarnpkg.com/@subsquid/util-internal-code-printer/-/util-internal-code-printer-0.1.1.tgz#78ff4c7d9cf49eedcaeb5371ed9f2c719f433438"
   integrity sha512-367YmYeLoLaOiBdlrYElEC4AeM4Kx0XYWM9mA9VBllGvT9qWNnGllaJ+mY9UBhlhWQtCbUnTRtHXhjR5qL8g1w==
 
+"@subsquid/util-internal-code-printer@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@subsquid/util-internal-code-printer/-/util-internal-code-printer-1.2.0.tgz#bb075d441fd27347921c1b5a6ee52583ff2967d1"
+  integrity sha512-UZgNiYs5C/aSBYXXi9LgWyjJ2Uy/0uYowNq8Hx4OhraJq8OoqS5Ef0K/RMf7+4tpgvuArocJUcpvtRCKWewvbA==
+
 "@subsquid/util-internal-commander@^0.0.2":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@subsquid/util-internal-commander/-/util-internal-commander-0.0.2.tgz#3719b8b15db09f631b8a2320b8eb03456ea868bd"
   integrity sha512-midCpkwu7NaXGhr0MiyQsJlIj284/0mAFBvVG8gRHqqRqb71GIAQq+aRcUSv8KNnAiRWnXK1OPak+gc40V9btw==
+
+"@subsquid/util-internal-commander@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@subsquid/util-internal-commander/-/util-internal-commander-1.3.0.tgz#e6179cb398f7155e83911ee8902531d7adc0c00b"
+  integrity sha512-ZSPzYjNZ/k/6qDa7xdrCgXkq/whYnVPLF8nX+35aAgrM+ShX7XUg/Dq6u0rW3u3sfWcKzsNFHbFB8SzjWN5StA==
 
 "@subsquid/util-internal-counters@^0.0.2":
   version "0.0.2"
@@ -940,6 +980,11 @@
   resolved "https://registry.yarnpkg.com/@subsquid/util-internal-hex/-/util-internal-hex-0.0.2.tgz#ac30e524db7d1dcba0d0e5c058767d70ea24a363"
   integrity sha512-EgqYmZjJ6ox885tXBObEAZQZImpRc5pFzQeOLEh78gGPTc39IH3VI4BG0zaomStvgBx+e25M7Y2cc+ae+ttuXQ==
 
+"@subsquid/util-internal-hex@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@subsquid/util-internal-hex/-/util-internal-hex-1.2.0.tgz#fcd7f61c3ed05d20865bc67f1558d8abb4ef3c3f"
+  integrity sha512-5Xf1Zp52gQlkNTeWFLGaf5ChXNCrOcz/nMYtylYASnfjEWXX8XutdDrUpz/YVQH88MP8CiQ/xkKprXAE9csqfg==
+
 "@subsquid/util-internal-http-client@^0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@subsquid/util-internal-http-client/-/util-internal-http-client-0.1.0.tgz#dcf3ef5195fcc56851307c9a39a309484236e170"
@@ -962,6 +1007,13 @@
   integrity sha512-X9bhhKWBcaeZekGEiE15i8xwfq07/aIYDhA+JFdiVT3aygdb9b57V85USuArd6oh3jjHeQ2SBgj6B5rd8m8vlA==
   dependencies:
     "@subsquid/util-internal-hex" "^0.0.2"
+
+"@subsquid/util-internal-json@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@subsquid/util-internal-json/-/util-internal-json-1.2.0.tgz#9122a8c5413d6da7ee4fbf2f3d4c3efc64136bc6"
+  integrity sha512-r9DlJWs6GFF4uS486QTeBmmrMAFqUdSgOmx/HfxkOfEO/iSVaoh2n8FKKw0uQyCVmnsDvoz8v6COOovL4blZWA==
+  dependencies:
+    "@subsquid/util-internal-hex" "^1.2.0"
 
 "@subsquid/util-internal-prometheus-server@^0.0.3":
   version "0.0.3"
@@ -1002,7 +1054,7 @@
   resolved "https://registry.yarnpkg.com/@subsquid/util-internal/-/util-internal-1.1.0.tgz#b40c013c439d421fe4a64fe426ba017e418042b5"
   integrity sha512-O6m666RDcWEw4vb3bmeNZKlAa1rGOHQvS0nhZFTBXnxZpqK/pU5N0jrQ7X/3is0pY2RKxFoxTurZjhv4QdxtqA==
 
-"@subsquid/util-internal@^2.3.0":
+"@subsquid/util-internal@^2.3.0", "@subsquid/util-internal@^2.4.0", "@subsquid/util-internal@^2.5.1":
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/@subsquid/util-internal/-/util-internal-2.5.1.tgz#941393873fdc0a7df6f983a939fd2240d829396b"
   integrity sha512-URBBCWP/cXuNhFP8B5Qsm6qaft1CIoWRhx8mCL1gDxasLWmPEnLC2eMHfMvU0CtF9mYKyXV2SjCf4BK9tQJ92g==
@@ -1634,6 +1686,11 @@ commander@^10.0.0:
   version "10.0.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-10.0.1.tgz#881ee46b4f77d1c1dccc5823433aa39b022cbe06"
   integrity sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==
+
+commander@^11.0.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-11.1.0.tgz#62fdce76006a68e5c1ab3314dc92e800eb83d906"
+  integrity sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==
 
 commander@^2.20.3:
   version "2.20.3"
@@ -2748,7 +2805,7 @@ node-fetch@^2.6.1, node-fetch@^2.6.7:
   dependencies:
     whatwg-url "^5.0.0"
 
-node-fetch@^3.3.0, node-fetch@^3.3.2:
+node-fetch@^3.3.0, node-fetch@^3.3.1, node-fetch@^3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-3.3.2.tgz#d1e889bacdf733b4ff3b2b243eb7a12866a0b78b"
   integrity sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==

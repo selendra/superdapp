@@ -1,8 +1,11 @@
-import { Account, EvmContract } from '../model'
-import { CONTRACT_METHODS, ContractType } from '../utils'
+import { ethers } from 'ethers'
+import { evmToAddress, addressToEvm } from '@polkadot/util-crypto'
+import { Account, EvmContract, TokenTransfer, Transfer, TransferDirection, TransferType } from "../model";
+import { CONTRACT_METHODS, ContractType, getTokenDetails } from '../utils'
 import { Action } from './base'
 import { ProcessorContext } from '../processor'
-import { ethers } from 'ethers'
+import * as erc20 from '../abi/erc20'
+import { chain } from '../chain'
 
 const CONTRACT_CREATION_IDENTIFIER = '608060'
 
@@ -11,20 +14,20 @@ export interface ContractData {
 }
 
 interface Opcode {
-  pc: number;
-  pushData?: Buffer;
-  name: string;
-  opcode: number;
-  fee: number;
-  in: number;
-  out: number;
-  dynamic: boolean;
-  async: boolean;
+  pc: number
+  pushData?: Buffer
+  name: string
+  opcode: number
+  fee: number
+  in: number
+  out: number
+  dynamic: boolean
+  async: boolean
 }
 
 interface Item {
-  hash: string;
-  name?: string;
+  hash: string
+  name?: string
 }
 
 export class EnsureEvmContract extends Action<ContractData> {
@@ -38,8 +41,7 @@ export class EnsureEvmContract extends Action<ContractData> {
 
     if (contract != null) return
 
-    const bytecode = this.data.item.event.call.args.transaction.value
-      .input
+    const bytecode = this.data.item.event.call.args.transaction.value.input
     if (!this.isContractCreationInput(bytecode)) return
 
     const contratcType = this.getContractTypeFromRaw(bytecode)
@@ -93,9 +95,80 @@ export class EnsureEvmContract extends Action<ContractData> {
   }
 }
 
-
-export class evmContractTransfer extends Action<ContractData> {
+export class evmContractErc20 extends Action<ContractData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
-    console.log(this.data.item)
+    const {
+      from,
+      to,
+      value: amount
+    } = erc20.events.Transfer.decode(this.data.item.event.args.log)
+    const address: string = this.data.item.event.args.log.address
+    const { name } = await getTokenDetails({
+      contractAddress: address,
+      contractStandard: 'ERC20',
+      ctx,
+      block: this.block.height
+    })
+
+    const fromAccount = await this.exitOrNot(ctx, from)
+    const toAccount = await this.exitOrNot(ctx, to)
+
+    let transfer = new TokenTransfer({
+      id: this.data.item.event.evmTxHash,
+      blockNumber: this.block.height,
+      timestamp: new Date(this.block.timestamp),
+      extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash: '0x',
+      from: fromAccount,
+      to: toAccount,
+      amount: amount,
+      success: this.data.item.event.call.success,
+      type: TransferType.ERC20
+    });
+
+    await ctx.store.insert(transfer);
+
+    let transferFrom = new Transfer({
+      id: transfer.id + "-from",
+      transfer,
+      account: fromAccount,
+      denom: name,
+      direction: TransferDirection.From,
+      
+    });
+
+    let transferTo = new Transfer({
+      id: transfer.id + "-to",
+      transfer,
+      account: toAccount,
+      denom: name,
+      direction: TransferDirection.To,
+    });
+    await ctx.store.insert([transferFrom, transferTo]);
+  }
+
+  private async exitOrNot(ctx: ProcessorContext, address: string) {
+    const substrateAddress = this.getSubstrateAddress(address)
+
+    let account = await ctx.store.get(Account, {
+      where: { id: substrateAddress }
+    })
+
+    if (account == null) {
+      account = new Account({
+        id: substrateAddress,
+        freeBalance: BigInt(0),
+        reservedBalance: BigInt(0),
+        totalBalance: BigInt(0),
+        updatedAt: this.block.height,
+        evmAddress: address
+      })
+      await ctx.store.save(account)
+    }
+
+    return account
+  }
+
+  private getSubstrateAddress(id: string) {
+    return evmToAddress(id, chain.config.prefix)
   }
 }

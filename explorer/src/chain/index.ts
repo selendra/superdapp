@@ -1,6 +1,15 @@
 import { assertNotNull } from '@subsquid/substrate-processor'
-import { ProcessorConfig, ChainApi, IChainData, IBlackListConfing } from './interfaces'
+import {
+  ProcessorConfig,
+  ChainApi,
+  IChainData,
+  IBlackListConfing
+} from './interfaces'
 import fs from 'fs'
+
+export const contractCallTimeout = process.env.CONTRACT_CALL_TIMEOUT
+  ? parseInt(process.env.CONTRACT_CALL_TIMEOUT)
+  : 6000
 
 function getJSON(filename: string) {
   const data = fs.readFileSync(filename).toString()
@@ -28,17 +37,17 @@ function getChain(): { api: ChainApi; config: ProcessorConfig } {
   if (!chainConfig) {
     throw new Error(`Chain ${chainName} not found in assets/chains-data.json`)
   }
-  
+
   let processorConfig: ProcessorConfig = {
     chainName: chainConfig.network,
     dataSource: {
       archive: 'https://archive-graphql.selendra.org/graphql',
       chain: 'wss://rpc1.selendra.org'
     },
-    prefix: chainConfig.prefix ? chainConfig.prefix: 42,
+    prefix: chainConfig.prefix ? chainConfig.prefix : 42,
     blockRange: {
       from: 705300
-    },
+    }
   }
 
   if (chainAPI.customConfig) {
