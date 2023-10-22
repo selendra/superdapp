@@ -1,4 +1,8 @@
-import { EnsureEvmContract, EnsureEvmAccount, evmContractErc20 } from '../action'
+import {
+  EnsureEvmContract,
+  EnsureEvmAccount,
+  evmContractErc20
+} from '../action'
 import { Action } from '../action/base'
 import * as erc20 from '../abi/erc20'
 import * as erc721 from '../abi/erc721'
@@ -25,11 +29,23 @@ export async function process(ctx: any) {
             switch ((item.event.args.log || item.event.args).topics[0]) {
               case erc20.events.Transfer.topic:
               case erc721.events.Transfer.topic:
-                actions.push(
-                  new evmContractErc20(header, item.event.extrinsic, {
-                    item: item
-                  }),
-                )
+                try {
+                  actions.push(
+                    new evmContractErc20(header, item.event.extrinsic, {
+                      item: item
+                    })
+                  )
+                } catch (error) {
+                  try {
+                    actions.push(
+                      new evmContractErc20(header, item.event.extrinsic, {
+                        item: item
+                      })
+                    )
+                  } catch (error) {
+                    console.log(error)
+                  }
+                }
             }
             break
           }

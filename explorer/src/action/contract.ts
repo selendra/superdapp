@@ -97,53 +97,59 @@ export class EnsureEvmContract extends Action<ContractData> {
 
 export class evmContractErc20 extends Action<ContractData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
-    const {
-      from,
-      to,
-      value: amount
-    } = erc20.events.Transfer.decode(this.data.item.event.args.log)
-    const address: string = this.data.item.event.args.log.address
-    const { name } = await getTokenDetails({
-      contractAddress: address,
-      contractStandard: 'ERC20',
-      ctx,
-      block: this.block.height
-    })
-
-    const fromAccount = await this.exitOrNot(ctx, from)
-    const toAccount = await this.exitOrNot(ctx, to)
-
-    let transfer = new TokenTransfer({
-      id: this.data.item.event.evmTxHash,
-      blockNumber: this.block.height,
-      timestamp: new Date(this.block.timestamp),
-      extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash: '0x',
-      from: fromAccount,
-      to: toAccount,
-      amount: amount,
-      success: this.data.item.event.call.success,
-      type: TransferType.ERC20
-    });
-
-    await ctx.store.insert(transfer);
-
-    let transferFrom = new Transfer({
-      id: transfer.id + "-from",
-      transfer,
-      account: fromAccount,
-      denom: name,
-      direction: TransferDirection.From,
-      
-    });
-
-    let transferTo = new Transfer({
-      id: transfer.id + "-to",
-      transfer,
-      account: toAccount,
-      denom: name,
-      direction: TransferDirection.To,
-    });
-    await ctx.store.insert([transferFrom, transferTo]);
+    try {
+      const {
+        from,
+        to,
+        value: amount
+      } = erc20.events.Transfer.decode(this.data.item.event.args.log)
+      const address: string = this.data.item.event.args.log.address
+      const { name } = await getTokenDetails({
+        contractAddress: address,
+        contractStandard: 'ERC20',
+        ctx,
+        block: this.block.height
+      })
+  
+      const fromAccount = await this.exitOrNot(ctx, from)
+      const toAccount = await this.exitOrNot(ctx, to)
+  
+      let transfer = new TokenTransfer({
+        id: this.data.item.event.evmTxHash,
+        blockNumber: this.block.height,
+        timestamp: new Date(this.block.timestamp),
+        extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash: '0x',
+        from: fromAccount,
+        to: toAccount,
+        amount: amount,
+        success: this.data.item.event.call.success,
+        type: TransferType.ERC20
+      });
+  
+      await ctx.store.insert(transfer);
+  
+      let transferFrom = new Transfer({
+        id: transfer.id + "-from",
+        transfer,
+        account: fromAccount,
+        denom: name,
+        direction: TransferDirection.From,
+        
+      });
+  
+      let transferTo = new Transfer({
+        id: transfer.id + "-to",
+        transfer,
+        account: toAccount,
+        denom: name,
+        direction: TransferDirection.To,
+      });
+      await ctx.store.insert([transferFrom, transferTo]);
+    } catch (error) {
+      console.log(error)
+      return
+    }
+  
   }
 
   private async exitOrNot(ctx: ProcessorContext, address: string) {
