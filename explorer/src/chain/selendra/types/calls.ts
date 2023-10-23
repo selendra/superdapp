@@ -118,6 +118,35 @@ export class BalancesTransferKeepAliveCall {
   }
 }
 
+export class ContractsCallCall {
+  private readonly _chain: Chain
+  private readonly call: Call
+
+  constructor(ctx: CallContext)
+  constructor(ctx: ChainContext, call: Call)
+  constructor(ctx: CallContext, call?: Call) {
+    call = call || ctx.call
+    assert(call.name === 'Contracts.call')
+    this._chain = ctx._chain
+    this.call = call
+  }
+
+  /**
+   * See [`Pallet::call`].
+   */
+  get isV10000(): boolean {
+    return this._chain.getCallHash('Contracts.call') === '9b1b707b0f5c537afca26d44d0081d29092614e330ff3810d328d0342d6a1845'
+  }
+
+  /**
+   * See [`Pallet::call`].
+   */
+  get asV10000(): {dest: v10000.MultiAddress, value: bigint, gasLimit: v10000.Weight, storageDepositLimit: (bigint | undefined), data: Uint8Array} {
+    assert(this.isV10000)
+    return this._chain.decodeCall(this.call)
+  }
+}
+
 export class IdentityAddSubCall {
   private readonly _chain: Chain
   private readonly call: Call
