@@ -1,8 +1,5 @@
-import { TypeormDatabase } from '@subsquid/typeorm-store'
-import { processor } from '../processor'
 import { encodeAddress } from '../utils'
 import { chain } from '../chain'
-import { Account } from '../model'
 import { Action } from '../action/base'
 import { EnsureAccount, TransferAction } from '../action'
 

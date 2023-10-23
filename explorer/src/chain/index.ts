@@ -47,7 +47,8 @@ function getChain(): { api: ChainApi; config: ProcessorConfig } {
     prefix: chainConfig.prefix ? chainConfig.prefix : 42,
     blockRange: {
       // from: 705300
-      from: 761799
+      // from: 761799
+      from: 21000
     }
   }
 
