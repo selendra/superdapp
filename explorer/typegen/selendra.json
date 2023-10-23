@@ -9,7 +9,13 @@
         "Identity.SubIdentityRemoved",
         "Identity.SubIdentityRevoked", 
         "Ethereum.Executed",
-        "EVM.Log"
+        "EVM.Log",
+        "Contracts.Instantiated",
+        "Contracts.ContractEmitted",
+        "Contracts.CodeStored",
+        "Contracts.ContractCodeUpdated",
+        "Contracts.CodeRemoved",
+        "Contracts.Terminated"
     ],
     "calls": [
         "Balances.transfer",
@@ -23,7 +29,8 @@
         "Identity.add_sub",
         "Identity.clear_identity",
         "Identity.kill_identity",
-        "Identity.rename_sub"
+        "Identity.rename_sub",
+        "Contracts.call"
     ],
     "storage": true
 }

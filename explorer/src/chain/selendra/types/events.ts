@@ -31,6 +31,190 @@ export class BalancesTransferEvent {
   }
 }
 
+export class ContractsCodeRemovedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Contracts.CodeRemoved')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * A code with the specified hash was removed.
+   */
+  get isV10000(): boolean {
+    return this._chain.getEventHash('Contracts.CodeRemoved') === '9e5c86c297bd88fae31bc40119e44695818ddc3ab8842b90daeb12771005c70d'
+  }
+
+  /**
+   * A code with the specified hash was removed.
+   */
+  get asV10000(): {codeHash: Uint8Array} {
+    assert(this.isV10000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContractsCodeStoredEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Contracts.CodeStored')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Code with the specified hash has been stored.
+   */
+  get isV10000(): boolean {
+    return this._chain.getEventHash('Contracts.CodeStored') === '9e5c86c297bd88fae31bc40119e44695818ddc3ab8842b90daeb12771005c70d'
+  }
+
+  /**
+   * Code with the specified hash has been stored.
+   */
+  get asV10000(): {codeHash: Uint8Array} {
+    assert(this.isV10000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContractsContractCodeUpdatedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Contracts.ContractCodeUpdated')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * A contract's code was updated.
+   */
+  get isV10000(): boolean {
+    return this._chain.getEventHash('Contracts.ContractCodeUpdated') === 'f9de6decda4961d31d7cf59e3f8acd4849a220323ebabbb036464d999de54c18'
+  }
+
+  /**
+   * A contract's code was updated.
+   */
+  get asV10000(): {contract: Uint8Array, newCodeHash: Uint8Array, oldCodeHash: Uint8Array} {
+    assert(this.isV10000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContractsContractEmittedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Contracts.ContractEmitted')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * A custom event emitted by the contract.
+   */
+  get isV10000(): boolean {
+    return this._chain.getEventHash('Contracts.ContractEmitted') === '7f28393268795b9a97f05e82911cdcc4200d99e9968c1ab6a564f949f753b929'
+  }
+
+  /**
+   * A custom event emitted by the contract.
+   */
+  get asV10000(): {contract: Uint8Array, data: Uint8Array} {
+    assert(this.isV10000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContractsInstantiatedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Contracts.Instantiated')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Contract deployed by address at the specified address.
+   */
+  get isV10000(): boolean {
+    return this._chain.getEventHash('Contracts.Instantiated') === '20f9f9057a4149f58eb48c00359f9800a42b51d4d2168437dfcce668c27a8d37'
+  }
+
+  /**
+   * Contract deployed by address at the specified address.
+   */
+  get asV10000(): {deployer: Uint8Array, contract: Uint8Array} {
+    assert(this.isV10000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContractsTerminatedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Contracts.Terminated')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Contract has been removed.
+   * 
+   * # Note
+   * 
+   * The only way for a contract to be removed and emitting this event is by calling
+   * `seal_terminate`.
+   */
+  get isV10000(): boolean {
+    return this._chain.getEventHash('Contracts.Terminated') === '8e0b376b4821223ecd835a0ae76a615e7aa14158260ff9c7f87220449d98175b'
+  }
+
+  /**
+   * Contract has been removed.
+   * 
+   * # Note
+   * 
+   * The only way for a contract to be removed and emitting this event is by calling
+   * `seal_terminate`.
+   */
+  get asV10000(): {contract: Uint8Array, beneficiary: Uint8Array} {
+    assert(this.isV10000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class EvmLogEvent {
   private readonly _chain: Chain
   private readonly event: Event
