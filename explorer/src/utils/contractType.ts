@@ -3,7 +3,6 @@ import { Contract as Erc20Contract } from '../abi/erc20'
 import { Contract as Erc721Contract } from '../abi/erc721'
 import { ProcessorContext } from '../processor'
 import { addTimeout } from '@subsquid/util-timeout';
-import { } from '../model'
 import { contractCallTimeout } from '../chain';
 
 export type ContractType = 'ERC20' | 'ERC721' | 'ERC1155' | 'unknown';

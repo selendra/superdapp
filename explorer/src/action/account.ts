@@ -7,20 +7,6 @@ import { Action } from './base'
 import { ProcessorContext } from '../processor'
 import { chain } from '../chain'
 
-
-export interface AccountData {
-  id: string,
-}
-
-export interface EvmAccountData {
-  item: any
-}
-
-export interface BalanceData {
-  free: bigint
-  reserved: bigint
-}
-
 export class EnsureAccount extends Action<AccountData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
     const balance = await this.getBalances(ctx, this.block, this.data.id)
@@ -121,3 +107,15 @@ export class EnsureEvmAccount extends Action<EvmAccountData> {
   }
 }
 
+interface AccountData {
+  id: string,
+}
+
+interface EvmAccountData {
+  item: any
+}
+
+interface BalanceData {
+  free: bigint
+  reserved: bigint
+}

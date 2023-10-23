@@ -1,180 +1,78 @@
-import { ethers } from 'ethers'
-import { evmToAddress, addressToEvm } from '@polkadot/util-crypto'
-import { Account, EvmContract, TokenTransfer, Transfer, TransferDirection, TransferType } from "../model";
-import { CONTRACT_METHODS, ContractType, getTokenDetails } from '../utils'
 import { Action } from './base'
 import { ProcessorContext } from '../processor'
-import * as erc20 from '../abi/erc20'
-import { chain } from '../chain'
+import { ContractCode } from '../model'
+import { ContractInfo } from '../chain/selendra/types/v10000'
+import { StorageInfo, Contract, Account } from '../model'
+import { SubstrateBlock, toHex } from '@subsquid/substrate-processor'
 
-const CONTRACT_CREATION_IDENTIFIER = '608060'
-
-export interface ContractData {
-  item: any
+interface ContractHash {
+  codeHash: string
 }
 
-interface Opcode {
-  pc: number
-  pushData?: Buffer
-  name: string
-  opcode: number
-  fee: number
-  in: number
-  out: number
-  dynamic: boolean
-  async: boolean
-}
-
-interface Item {
-  hash: string
-  name?: string
-}
-
-export class EnsureEvmContract extends Action<ContractData> {
+export class RemoveContract extends Action<ContractHash> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
-    const contractId = this.data.item.event.args.to
-    const signer = this.data.item.event.args.from
-
-    let contract = await ctx.store.get(EvmContract, {
-      where: { id: contractId }
+    const contractCodeEntity = await ctx.store.get(ContractCode, {
+      where: { id: this.data.codeHash },
+      relations: {
+        owner: true,
+      }
     })
 
-    if (contract != null) return
-
-    const bytecode = this.data.item.event.call.args.transaction.value.input
-    if (!this.isContractCreationInput(bytecode)) return
-
-    const contratcType = this.getContractTypeFromRaw(bytecode)
-    const { context, args } = this.preprocessBytecode(bytecode)
-
-    contract = new EvmContract({
-      id: contractId,
-      extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash : '0x',
-      account: signer,
-      bytecode,
-      bytecodeContext: context,
-      bytecodeArguments: args,
-      timestamp: this.block.height,
-      type: contratcType
-    })
-
-    await ctx.store.save(contract)
-  }
-
-  private preprocessBytecode(bytecode: string) {
-    const start = bytecode.indexOf('6080604052')
-    const end =
-      bytecode.indexOf('a265627a7a72315820') !== -1
-        ? bytecode.indexOf('a265627a7a72315820')
-        : bytecode.indexOf('a264697066735822')
-    return {
-      context: bytecode.slice(start, end),
-      args: bytecode.slice(end)
-    }
-  }
-
-  private isContractCreationInput(bytecode: string) {
-    return bytecode.includes(CONTRACT_CREATION_IDENTIFIER)
-  }
-
-  private getContractTypeFromRaw(txInput: string): ContractType {
-    const found = Object.entries(CONTRACT_METHODS).find(([_, methods]) => {
-      return methods.every((signature) => {
-        const methodId = ethers
-          .keccak256(Buffer.from(signature))
-          .substring(2, 10)
-        return txInput.includes(methodId)
-      })
-    })
-
-    if (!found) {
-      return 'unknown'
-    }
-
-    return found[0] as ContractType
+    if (contractCodeEntity == null) return
   }
 }
 
-export class evmContractErc20 extends Action<ContractData> {
+interface ContractData {
+  contractInfo: ContractInfo
+  deployer: string
+  contract: string
+}
+
+export class CreateContract extends Action<ContractData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
-    try {
-      const {
-        from,
-        to,
-        value: amount
-      } = erc20.events.Transfer.decode(this.data.item.event.args.log)
-      const address: string = this.data.item.event.args.log.address
-      const { name } = await getTokenDetails({
-        contractAddress: address,
-        contractStandard: 'ERC20',
-        ctx,
-        block: this.block.height
-      })
-  
-      const fromAccount = await this.exitOrNot(ctx, from)
-      const toAccount = await this.exitOrNot(ctx, to)
-  
-      let transfer = new TokenTransfer({
-        id: this.data.item.event.evmTxHash,
-        blockNumber: this.block.height,
-        timestamp: new Date(this.block.timestamp),
-        extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash: '0x',
-        from: fromAccount,
-        to: toAccount,
-        amount: amount,
-        success: this.data.item.event.call.success,
-        type: TransferType.ERC20
-      });
-  
-      await ctx.store.insert(transfer);
-  
-      let transferFrom = new Transfer({
-        id: transfer.id + "-from",
-        transfer,
-        account: fromAccount,
-        denom: name,
-        direction: TransferDirection.From,
-        
-      });
-  
-      let transferTo = new Transfer({
-        id: transfer.id + "-to",
-        transfer,
-        account: toAccount,
-        denom: name,
-        direction: TransferDirection.To,
-      });
-      await ctx.store.insert([transferFrom, transferTo]);
-    } catch (error) {
-      console.log(error)
-      return
-    }
-  
-  }
-
-  private async exitOrNot(ctx: ProcessorContext, address: string) {
-    const substrateAddress = this.getSubstrateAddress(address)
-
-    let account = await ctx.store.get(Account, {
-      where: { id: substrateAddress }
+    const contract = await ctx.store.get(Contract, {
+      where: { id: this.data.contract }
     })
 
-    if (account == null) {
-      account = new Account({
-        id: substrateAddress,
-        freeBalance: BigInt(0),
-        reservedBalance: BigInt(0),
-        totalBalance: BigInt(0),
-        updatedAt: this.block.height,
-        evmAddress: address
-      })
-      await ctx.store.save(account)
-    }
+    if(contract != null) return
 
-    return account
-  }
+    const contractAccount = await ctx.store.get(Account, {
+      where: { id: this.data.contract }
+    })
 
-  private getSubstrateAddress(id: string) {
-    return evmToAddress(id, chain.config.prefix)
+    if(contractAccount == null) return
+
+    const deployerAccount = await ctx.store.get(Account, {
+      where: { id: this.data.deployer }
+    })
+
+    if(deployerAccount == null) return
+
+    const storageInfo = new StorageInfo({
+      storageBaseDeposit: this.data.contractInfo.storageBaseDeposit,
+      storageByteDeposit: this.data.contractInfo.storageByteDeposit,
+      storageBytes: this.data.contractInfo.storageBytes,
+      storageItemDeposit: this.data.contractInfo.storageItemDeposit,
+      storageItems: this.data.contractInfo.storageItems
+    })
+
+    const contractCodeEntity = new ContractCode({
+      id: toHex(this.data.contractInfo.codeHash),
+      owner: deployerAccount,
+      createdFrom: this.extrinsic?.hash ? this.extrinsic.hash : '0x',
+      createdAt: new Date(this.block.timestamp),
+    })
+
+    const contractEntity = new Contract({
+      id: this.data.contract,
+      trieId:  this.data.contractInfo.trieId,
+      contractAccount: contractAccount,
+      contractCode: contractCodeEntity,
+      storageInfo,
+    })
+
+
+    await ctx.store.save(contractCodeEntity)
+    await ctx.store.save(contractEntity)
   }
 }
