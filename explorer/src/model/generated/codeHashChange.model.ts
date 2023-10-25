@@ -1,6 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
 import {Contract} from "./contract.model"
-import {Extrinsic} from "./extrinsic.model"
 
 @Entity_()
 export class CodeHashChange {
@@ -24,7 +23,6 @@ export class CodeHashChange {
   @Column_("timestamp with time zone", {nullable: false})
   changedAt!: Date
 
-  @Index_()
-  @ManyToOne_(() => Extrinsic, {nullable: true})
-  extrinsic!: Extrinsic
+  @Column_("text", {nullable: false})
+  extrinsicHash!: string
 }

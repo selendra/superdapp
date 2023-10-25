@@ -232,7 +232,7 @@ type Contract @entity {
   contractAccount: Account! @unique
   contractCode: ContractCode!
   terminatedAt: DateTime
-  terminatedFrom: Extrinsic
+  terminatedExtrinsicHash: String
   terminationBeneficiary: Account
   storageInfo: StorageInfo!
   codeHashChanges: [CodeHashChange!] @derivedFrom(field: "contract")
@@ -244,7 +244,7 @@ type CodeHashChange @entity {
   newCodeHash: String!
   oldCodeHash: String!
   changedAt: DateTime!
-  extrinsic: Extrinsic!
+  extrinsicHash: String!
 }
 
 type ContractCode @entity {
@@ -252,21 +252,21 @@ type ContractCode @entity {
   id: ID!
   owner: Account!
   createdAt: DateTime!
-  createdFrom: String!
+  createdExtrinsicHash: String!
   removedAt: DateTime
-  removedFrom: Extrinsic
+  removedExtrinsicHash: String
   contractsDeployed: [Contract!] @derivedFrom(field: "contractCode")
 }
 
 type ContractEvent @entity {
   "Event ID"
   id: ID!
-  blockNumber: String!
-  indexInBlock: String!
+  blockNumber: Int!
+  indexInBlock: Int!
   contractAddress: String!
   data: Bytes!
   createdAt: DateTime!
-  extrinsic: Extrinsic!
+  extrinsicHash: String!
   decodedEvent: DecodedContractEvent @derivedFrom(field: "contractEvent")
 }
 

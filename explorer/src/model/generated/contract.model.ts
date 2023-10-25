@@ -2,7 +2,6 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, O
 import * as marshal from "./marshal"
 import {Account} from "./account.model"
 import {ContractCode} from "./contractCode.model"
-import {Extrinsic} from "./extrinsic.model"
 import {StorageInfo} from "./_storageInfo"
 import {CodeHashChange} from "./codeHashChange.model"
 
@@ -33,9 +32,8 @@ export class Contract {
   @Column_("timestamp with time zone", {nullable: true})
   terminatedAt!: Date | undefined | null
 
-  @Index_()
-  @ManyToOne_(() => Extrinsic, {nullable: true})
-  terminatedFrom!: Extrinsic | undefined | null
+  @Column_("text", {nullable: true})
+  terminatedExtrinsicHash!: string | undefined | null
 
   @Index_()
   @ManyToOne_(() => Account, {nullable: true})

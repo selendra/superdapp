@@ -1,15 +1,18 @@
-import { SubstrateBlock } from '@subsquid/substrate-processor'
 import { evmToAddress, addressToEvm } from '@polkadot/util-crypto'
 import { u8aToHex } from '@polkadot/util'
 import { Account } from '../model'
-import { decodeAddress } from '../utils'
+import { getBalances } from '../utils'
 import { Action } from './base'
 import { ProcessorContext } from '../processor'
 import { chain } from '../chain'
 
+interface AccountData {
+  id: string,
+}
+
 export class EnsureAccount extends Action<AccountData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
-    const balance = await this.getBalances(ctx, this.block, this.data.id)
+    const balance = await getBalances(ctx, this.block, this.data.id)
     if (!balance) {
       ctx.log.warn('No balances')
       return
@@ -31,29 +34,13 @@ export class EnsureAccount extends Action<AccountData> {
     await ctx.store.save(account)
   }
 
-  private async getBalances(
-    ctx: ProcessorContext,
-    block: SubstrateBlock,
-    id: string
-  ): Promise<(BalanceData | undefined) | undefined> {
-    const accountIdsU8 = decodeAddress(id)
-    return (
-      (await chain.api.storages.balances.getSystemAccountBalances.decode(
-        ctx,
-        block,
-        accountIdsU8
-      )) ||
-      (await chain.api.storages.balances.getBalancesAccountBalances.decode(
-        ctx,
-        block,
-        accountIdsU8
-      ))
-    )
-  }
-
   private getEvmAddress(id: string) {
     return u8aToHex(addressToEvm(id, true))
   }
+}
+
+interface EvmAccountData {
+  item: any
 }
 
 export class EnsureEvmAccount extends Action<EvmAccountData> {
@@ -62,7 +49,7 @@ export class EnsureEvmAccount extends Action<EvmAccountData> {
     const signer = await this.data.item.event.args.from
     const substrateAddress = this.getSubstrateAddress(signer)
 
-    const balance = await this.getBalances(ctx, this.block, substrateAddress)
+    const balance = await getBalances(ctx, this.block, substrateAddress)
     if (!balance) {
       ctx.log.warn('No balances')
       return
@@ -82,40 +69,9 @@ export class EnsureEvmAccount extends Action<EvmAccountData> {
     await ctx.store.save(account)
   }
 
-  private async getBalances(
-    ctx: ProcessorContext,
-    block: SubstrateBlock,
-    id: string
-  ): Promise<(BalanceData | undefined) | undefined> {
-    const accountIdsU8 = decodeAddress(id)
-    return (
-      (await chain.api.storages.balances.getSystemAccountBalances.decode(
-        ctx,
-        block,
-        accountIdsU8
-      )) ||
-      (await chain.api.storages.balances.getBalancesAccountBalances.decode(
-        ctx,
-        block,
-        accountIdsU8
-      ))
-    )
-  }
-
   private getSubstrateAddress(id: string) {
     return evmToAddress(id, chain.config.prefix)
   }
 }
 
-interface AccountData {
-  id: string,
-}
 
-interface EvmAccountData {
-  item: any
-}
-
-interface BalanceData {
-  free: bigint
-  reserved: bigint
-}

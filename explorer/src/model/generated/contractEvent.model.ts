@@ -1,5 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToOne as OneToOne_} from "typeorm"
-import {Extrinsic} from "./extrinsic.model"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToOne as OneToOne_} from "typeorm"
 import {DecodedContractEvent} from "./decodedContractEvent.model"
 
 @Entity_()
@@ -14,11 +13,11 @@ export class ContractEvent {
   @PrimaryColumn_()
   id!: string
 
-  @Column_("text", {nullable: false})
-  blockNumber!: string
+  @Column_("int4", {nullable: false})
+  blockNumber!: number
 
-  @Column_("text", {nullable: false})
-  indexInBlock!: string
+  @Column_("int4", {nullable: false})
+  indexInBlock!: number
 
   @Column_("text", {nullable: false})
   contractAddress!: string
@@ -29,9 +28,8 @@ export class ContractEvent {
   @Column_("timestamp with time zone", {nullable: false})
   createdAt!: Date
 
-  @Index_()
-  @ManyToOne_(() => Extrinsic, {nullable: true})
-  extrinsic!: Extrinsic
+  @Column_("text", {nullable: false})
+  extrinsicHash!: string
 
   @OneToOne_(() => DecodedContractEvent)
   decodedEvent!: DecodedContractEvent | undefined | null
