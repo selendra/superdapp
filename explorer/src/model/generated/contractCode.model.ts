@@ -1,6 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_} from "typeorm"
 import {Account} from "./account.model"
-import {Extrinsic} from "./extrinsic.model"
 import {Contract} from "./contract.model"
 
 @Entity_()
@@ -23,14 +22,13 @@ export class ContractCode {
   createdAt!: Date
 
   @Column_("text", {nullable: false})
-  createdFrom!: string
+  createdExtrinsicHash!: string
 
   @Column_("timestamp with time zone", {nullable: true})
   removedAt!: Date | undefined | null
 
-  @Index_()
-  @ManyToOne_(() => Extrinsic, {nullable: true})
-  removedFrom!: Extrinsic | undefined | null
+  @Column_("text", {nullable: true})
+  removedExtrinsicHash!: string | undefined | null
 
   @OneToMany_(() => Contract, e => e.contractCode)
   contractsDeployed!: Contract[]

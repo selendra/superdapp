@@ -3,10 +3,12 @@ import { Keyring } from '@polkadot/api'
 import {
   decodeHex,
   toHex,
-  CommonHandlerContext
+  CommonHandlerContext,
+  SubstrateBlock
 } from '@subsquid/substrate-processor'
 import { chain, BLACKLIST_CONFIG } from '../chain'
 import { CounterLevel, ItemsCounter, ItemType } from '../model'
+import { ProcessorContext } from '../processor'
 
 const keyring = new Keyring()
 
@@ -201,5 +203,30 @@ export function dataToString(data: unknown): string {
   }
   throw new Error(
     `Conversion of arg type [${typeof data}] to string is not supported`
+  )
+}
+
+interface BalanceData {
+  free: bigint
+  reserved: bigint
+}
+
+export async function getBalances(
+  ctx: ProcessorContext,
+  block: SubstrateBlock,
+  id: string
+): Promise<(BalanceData | undefined) | undefined> {
+  const accountIdsU8 = decodeAddress(id)
+  return (
+    (await chain.api.storages.balances.getSystemAccountBalances.decode(
+      ctx,
+      block,
+      accountIdsU8
+    )) ||
+    (await chain.api.storages.balances.getBalancesAccountBalances.decode(
+      ctx,
+      block,
+      accountIdsU8
+    ))
   )
 }
