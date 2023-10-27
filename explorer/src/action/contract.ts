@@ -3,7 +3,7 @@ import { ProcessorContext } from '../processor'
 import { CodeHashChange, ContractCode, ContractEvent } from '../model'
 import { StorageInfo, Contract, Account } from '../model'
 import { SubstrateBlock, toHex } from '@subsquid/substrate-processor'
-import { getBalances } from '../utils'
+import { encodeAddress, getBalances } from '../utils'
 
 interface ContractHash {
   codeHash: string
@@ -53,13 +53,14 @@ export class CreateContract extends Action<ContractData> {
     })
 
     if (deployerAccount == null) return
-
+    
     let contractCodeEntity = await ctx.store.get(ContractCode, {
-      where: { id: this.data.contractInfo.codeHash }
+      where: { id: toHex(this.data.contractInfo.codeHash) }
     })
+
     if (contractCodeEntity == null) {
       contractCodeEntity = new ContractCode({
-        id: toHex(this.data.contractInfo.codeHash),
+        id: this.data.contractInfo.codeHash,
         owner: deployerAccount,
         createdExtrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash : '0x',
         createdAt: new Date(this.block.timestamp)
