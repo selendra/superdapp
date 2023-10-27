@@ -136,6 +136,9 @@ export async function process(ctx: any) {
           )
           break
         }
+        case 'Contracts.call': {
+          console.log('contract')
+        }
       }
     }
   }
