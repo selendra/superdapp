@@ -305,12 +305,11 @@ type DecodedContractEvent @entity {
 type ContractActivity @entity{
   id: ID!
   type: ActivityType! @index
-  action: String!
   to: Account
   from: Account
   createdAt: DateTime! @index
   args: JSON
-  extrinsic: Extrinsic!
+  extrinsicHash: String!
   decodedActivity: DecodedContractActivity @derivedFrom(field: "activity")
 }
 

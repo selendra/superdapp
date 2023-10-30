@@ -7,9 +7,10 @@ import {
   TerminatedContract,
   CodeStoredContract,
   ContractEmittedContract,
-  UpdateContract
+  UpdateContract,
+  CallContract
 } from '../action'
-import { encodeAddress } from '../utils'
+import { encodeAddress, getSignerAddress } from '../utils'
 
 export async function process(ctx: any) {
   const actions: Action[] = []
@@ -137,7 +138,31 @@ export async function process(ctx: any) {
           break
         }
         case 'Contracts.call': {
-          console.log('contract')
+          const { contractAddress, data } =
+            chain.api.calls.contract.ContractsCall.decode(ctx, item.call)
+            
+          const { signature } = item.extrinsic
+
+          let from: string = 'undefine'
+          if (signature != null) {
+            from = getSignerAddress(signature)
+          }
+
+          actions.push(
+            new EnsureAccount(header, item.extrinsic, {
+              id: contractAddress
+            }),
+            new EnsureAccount(header, item.extrinsic, {
+              id: from
+            }),
+            new CallContract(header, item.extrinsic, {
+              id: item.call.id,
+              from,
+              contractAddress,
+              data
+            }),
+            )
+          break
         }
       }
     }

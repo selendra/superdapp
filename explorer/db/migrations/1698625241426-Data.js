@@ -1,5 +1,5 @@
-module.exports = class Data1698365553102 {
-    name = 'Data1698365553102'
+module.exports = class Data1698625241426 {
+    name = 'Data1698625241426'
 
     async up(db) {
         await db.query(`CREATE TABLE "call" ("id" character varying NOT NULL, "parent_id" text, "extrinsic_hash" text, "block_number" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "call_name" text NOT NULL, "pallet_name" text NOT NULL, "success" boolean NOT NULL, "caller_public_key" text, "args_str" text array, "block_id" character varying, "extrinsic_id" character varying, CONSTRAINT "PK_2098af0169792a34f9cfdd39c47" PRIMARY KEY ("id"))`)
@@ -88,12 +88,11 @@ module.exports = class Data1698365553102 {
         await db.query(`CREATE INDEX "IDX_4efb40251892ec33d379389966" ON "decoded_contract_event" ("name") `)
         await db.query(`CREATE UNIQUE INDEX "IDX_edd23d9c31f6637d9884c90799" ON "decoded_contract_event" ("contract_event_id") `)
         await db.query(`CREATE TABLE "contract_event" ("id" character varying NOT NULL, "block_number" integer NOT NULL, "index_in_block" integer NOT NULL, "contract_address" text NOT NULL, "data" bytea NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "extrinsic_hash" text NOT NULL, CONSTRAINT "PK_a0a0fdb2918e838e546c3b5fd01" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "contract_activity" ("id" character varying NOT NULL, "type" character varying(17) NOT NULL, "action" text NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "args" jsonb, "to_id" character varying, "from_id" character varying, "extrinsic_id" character varying, CONSTRAINT "PK_c361a3f02b075a1f2625f306d29" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "contract_activity" ("id" character varying NOT NULL, "type" character varying(17) NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "args" jsonb, "extrinsic_hash" text NOT NULL, "to_id" character varying, "from_id" character varying, CONSTRAINT "PK_c361a3f02b075a1f2625f306d29" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_2e23460298d3b7cb30efb1a701" ON "contract_activity" ("type") `)
         await db.query(`CREATE INDEX "IDX_c157f511ff9f0790ee990d0bc9" ON "contract_activity" ("to_id") `)
         await db.query(`CREATE INDEX "IDX_71fc246e38bbf6ef671e2414c7" ON "contract_activity" ("from_id") `)
         await db.query(`CREATE INDEX "IDX_e9932940266610b1649df54bf4" ON "contract_activity" ("created_at") `)
-        await db.query(`CREATE INDEX "IDX_dc6e91716d96347892669cecf5" ON "contract_activity" ("extrinsic_id") `)
         await db.query(`CREATE TABLE "decoded_activity_arg" ("id" character varying NOT NULL, "name" text NOT NULL, "value" text NOT NULL, "type" text NOT NULL, "display_name" text, "decoded_activity_id" character varying, CONSTRAINT "PK_2aff5b1e007a69cf0c87bd533c4" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_36740724ff3a3b6c5e6be414a8" ON "decoded_activity_arg" ("decoded_activity_id") `)
         await db.query(`CREATE TABLE "decoded_contract_activity" ("id" character varying NOT NULL, "name" text NOT NULL, "activity_id" character varying NOT NULL, CONSTRAINT "REL_814a36ed4fa397a47972e4137d" UNIQUE ("activity_id"), CONSTRAINT "PK_9e4cd6a178efaa18aeef2621d59" PRIMARY KEY ("id"))`)
@@ -124,7 +123,6 @@ module.exports = class Data1698365553102 {
         await db.query(`ALTER TABLE "decoded_contract_event" ADD CONSTRAINT "FK_edd23d9c31f6637d9884c907991" FOREIGN KEY ("contract_event_id") REFERENCES "contract_event"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "contract_activity" ADD CONSTRAINT "FK_c157f511ff9f0790ee990d0bc90" FOREIGN KEY ("to_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "contract_activity" ADD CONSTRAINT "FK_71fc246e38bbf6ef671e2414c79" FOREIGN KEY ("from_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
-        await db.query(`ALTER TABLE "contract_activity" ADD CONSTRAINT "FK_dc6e91716d96347892669cecf55" FOREIGN KEY ("extrinsic_id") REFERENCES "extrinsic"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "decoded_activity_arg" ADD CONSTRAINT "FK_36740724ff3a3b6c5e6be414a85" FOREIGN KEY ("decoded_activity_id") REFERENCES "decoded_contract_activity"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "decoded_contract_activity" ADD CONSTRAINT "FK_814a36ed4fa397a47972e4137d7" FOREIGN KEY ("activity_id") REFERENCES "contract_activity"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     }
@@ -221,7 +219,6 @@ module.exports = class Data1698365553102 {
         await db.query(`DROP INDEX "public"."IDX_c157f511ff9f0790ee990d0bc9"`)
         await db.query(`DROP INDEX "public"."IDX_71fc246e38bbf6ef671e2414c7"`)
         await db.query(`DROP INDEX "public"."IDX_e9932940266610b1649df54bf4"`)
-        await db.query(`DROP INDEX "public"."IDX_dc6e91716d96347892669cecf5"`)
         await db.query(`DROP TABLE "decoded_activity_arg"`)
         await db.query(`DROP INDEX "public"."IDX_36740724ff3a3b6c5e6be414a8"`)
         await db.query(`DROP TABLE "decoded_contract_activity"`)
@@ -252,7 +249,6 @@ module.exports = class Data1698365553102 {
         await db.query(`ALTER TABLE "decoded_contract_event" DROP CONSTRAINT "FK_edd23d9c31f6637d9884c907991"`)
         await db.query(`ALTER TABLE "contract_activity" DROP CONSTRAINT "FK_c157f511ff9f0790ee990d0bc90"`)
         await db.query(`ALTER TABLE "contract_activity" DROP CONSTRAINT "FK_71fc246e38bbf6ef671e2414c79"`)
-        await db.query(`ALTER TABLE "contract_activity" DROP CONSTRAINT "FK_dc6e91716d96347892669cecf55"`)
         await db.query(`ALTER TABLE "decoded_activity_arg" DROP CONSTRAINT "FK_36740724ff3a3b6c5e6be414a85"`)
         await db.query(`ALTER TABLE "decoded_contract_activity" DROP CONSTRAINT "FK_814a36ed4fa397a47972e4137d7"`)
     }
