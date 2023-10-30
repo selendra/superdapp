@@ -308,3 +308,17 @@ export async function saveAll<E extends Entity | undefined>(
     }
   }
 }
+
+export async function decodeData(
+  data: string | Uint8Array | Buffer | undefined,
+  cb: (data: string | Uint8Array | Buffer) => Promise<void>,
+): Promise<void> {
+  if (chain.config.sourceCodeEnabled && data) {
+    try {
+      await cb(data)
+    } catch (error) {
+      const { message } = <Error>error
+      console.log(message)
+    }
+  }
+}

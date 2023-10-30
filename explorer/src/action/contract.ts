@@ -17,7 +17,13 @@ import {
   SubstrateExtrinsicSignature,
   toHex
 } from '@subsquid/substrate-processor'
-import { createActivity, encodeAddress, getBalances, saveAll } from '../utils'
+import {
+  createActivity,
+  decodeData,
+  encodeAddress,
+  getBalances,
+  saveAll
+} from '../utils'
 import { chain } from '../chain'
 import { DecodedElement } from '../abi/wasmDecoder/types'
 import { Entity } from '@subsquid/typeorm-store'
@@ -163,10 +169,13 @@ export class TerminatedContract extends Action<TerminatedContractData> {
 interface ContractCodeStored {
   codeHash: string
   owner: string
+  id: string
 }
 
 export class CodeStoredContract extends Action<ContractCodeStored> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
+    const entities: OptEntity[] = [];
+
     const ownerAccount = await ctx.store.get(Account, {
       where: { id: this.data.owner }
     })
@@ -186,7 +195,18 @@ export class CodeStoredContract extends Action<ContractCodeStored> {
       })
     }
 
-    await ctx.store.save(contractCodeEntity)
+    const activityEntity = createActivity(
+      this.extrinsic.hash,
+      this.data.id,
+      ActivityType.CODESTORED,
+      undefined,
+      new Date(this.block.timestamp),
+      ownerAccount,
+    );
+
+    entities.push(activityEntity, contractCodeEntity)
+
+    await saveAll(ctx.store, entities);
   }
 }
 
@@ -194,11 +214,14 @@ interface ContractEmitted {
   id: string
   contract: string
   data: Uint8Array
+  codeHash: Uint8Array
   indexInBlock: number
 }
 
 export class ContractEmittedContract extends Action<ContractEmitted> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
+    const entities: OptEntity[] = []
+
     const contractEventEntity = new ContractEvent({
       id: this.data.id,
       blockNumber: this.block.height,
@@ -208,7 +231,27 @@ export class ContractEmittedContract extends Action<ContractEmitted> {
       createdAt: new Date(this.block.timestamp),
       extrinsicHash: this.extrinsic?.hash
     })
-    await ctx.store.save(contractEventEntity)
+    entities.push(contractEventEntity)
+
+    // Decode data with ABI
+    await decodeData(
+      this.data.data,
+      async (rawData: string | Uint8Array | Buffer) => {
+  
+        const decodedElement = await abiDecoder.decodeEvent({
+          codeHash: toHex(this.data.codeHash),
+          data: rawData
+        })
+
+        this.addDecodedEventEntities({
+          entities,
+          decodedElement,
+          contractEventEntity
+        })
+      }
+    )
+
+    await saveAll(ctx.store, entities)
   }
 
   private addDecodedEventEntities({
@@ -327,10 +370,10 @@ export class CallContract extends Action<ContractCall> {
       signerAccount
     )
 
-    entities.push(activityEntity);
+    entities.push(activityEntity)
 
     // Decode data with ABI
-    await this.decodeData(
+    await decodeData(
       this.data.data,
       async (rawData: string | Uint8Array | Buffer) => {
         const codeHash = await this.getCodeHashForContract(
@@ -351,11 +394,10 @@ export class CallContract extends Action<ContractCall> {
             activityEntity
           })
         }
-      },
-      (errorMessage) => console.log(errorMessage)
+      }
     )
 
-    await saveAll(ctx.store, entities);
+    await saveAll(ctx.store, entities)
   }
 
   private async getCodeHashForContract(
@@ -391,21 +433,6 @@ export class CallContract extends Action<ContractCall> {
       }
     }
     return resolvedCodeHash
-  }
-
-  private async decodeData(
-    data: string | Uint8Array | Buffer | undefined,
-    cb: (data: string | Uint8Array | Buffer) => Promise<void>,
-    log: (errorMessage: string) => void
-  ): Promise<void> {
-    if (chain.config.sourceCodeEnabled && data) {
-      try {
-        await cb(data)
-      } catch (error) {
-        const { message } = <Error>error
-        console.log(message)
-      }
-    }
   }
 
   private addDecodedActivityEntities({

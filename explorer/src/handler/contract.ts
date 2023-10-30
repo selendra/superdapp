@@ -90,7 +90,8 @@ export async function process(ctx: any) {
           actions.push(
             new CodeStoredContract(header, item.event.extrinsic, {
               codeHash: data.codeHash,
-              owner: owneraddress
+              owner: owneraddress,
+              id: item.event.id,
             })
           )
           break
@@ -99,11 +100,15 @@ export async function process(ctx: any) {
           const { contract, data } =
             chain.api.events.contract.ContractEmitted.decode(ctx, item.event)
 
+          const { codeHash } =
+            await chain.api.storages.contract.getContractInfoOfStorage.decode(ctx, header, contract)
+
           actions.push(
             new ContractEmittedContract(header, item.event.extrinsic, {
               id: item.event.id,
               contract,
               data,
+              codeHash,
               indexInBlock: item.event.indexInBlock
             })
           )
@@ -140,7 +145,7 @@ export async function process(ctx: any) {
         case 'Contracts.call': {
           const { contractAddress, data } =
             chain.api.calls.contract.ContractsCall.decode(ctx, item.call)
-            
+
           const { signature } = item.extrinsic
 
           let from: string = 'undefine'
