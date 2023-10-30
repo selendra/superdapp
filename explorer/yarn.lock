@@ -804,6 +804,13 @@
     "@subsquid/util-internal-hex" "^1.2.1"
     "@subsquid/util-internal-json" "^1.2.1"
 
+"@subsquid/scale-type-system@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@subsquid/scale-type-system/-/scale-type-system-1.0.1.tgz#0aedd7e40696dfc866dffb4cae87e3546b329b75"
+  integrity sha512-CjY5nBzGrbRcOH//lOwNHbBjHtHD0t27SirdIAFre/Mp4fLIiv6gEkIgNYu+lwAjMvuFkLkcw7JGmwXvLNepNw==
+  dependencies:
+    "@subsquid/util-internal" "^2.5.2"
+
 "@subsquid/ss58-codec@^0.1.2":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@subsquid/ss58-codec/-/ss58-codec-0.1.2.tgz#e3ddbc806c6df854e40839837908e7312551aeba"
@@ -884,6 +891,19 @@
     "@subsquid/util-xxhash" "^0.1.2"
     blake2b "^2.1.4"
     prom-client "^14.1.1"
+
+"@subsquid/substrate-runtime@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@subsquid/substrate-runtime/-/substrate-runtime-1.0.1.tgz#7e4f8b19a02861fcf3a2d2a308ee756d9a6a1a34"
+  integrity sha512-L7ln2EaIfl99uAbkz3Nw6oIXdpj2yfBk5qUyOJ/nOm5WHGBE3NKw0nIfgnC6EbbsNJKZZfJT0Tm+eRZZlUakug==
+  dependencies:
+    "@subsquid/scale-codec" "^4.0.0"
+    "@subsquid/scale-type-system" "^1.0.0"
+    "@subsquid/util-internal" "^2.5.2"
+    "@subsquid/util-internal-hex" "^1.2.1"
+    "@subsquid/util-naming" "^1.2.1"
+    "@subsquid/util-xxhash" "^1.2.1"
+    blake2b "^2.1.4"
 
 "@subsquid/substrate-typegen@1.4.2":
   version "1.4.2"
@@ -1087,6 +1107,14 @@
     camelcase "^6.3.0"
     inflected "^2.1.0"
 
+"@subsquid/util-naming@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@subsquid/util-naming/-/util-naming-1.2.1.tgz#2cca91f5986c6e591d5899d7ade3c01ef42a458b"
+  integrity sha512-l5rvAXG7TxMPeB5kFTTZWisgN0DNe1mVBHT2V2/nxUx4sOfYfneWIN/+02YqJI/GHX9FoOTB6ru7WLfQEMhvhg==
+  dependencies:
+    camelcase "^6.3.0"
+    inflected "^2.1.0"
+
 "@subsquid/util-timeout@^0.0.0":
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/@subsquid/util-timeout/-/util-timeout-0.0.0.tgz#af88f292b15b22ed40a2f0ff939140f7fb2e1b89"
@@ -1101,6 +1129,14 @@
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@subsquid/util-xxhash/-/util-xxhash-0.1.2.tgz#50b3c1a79019d5db63413d0b04e1ad901cd846a7"
   integrity sha512-UQ1opUT0vP2wwCYblM5TvDtvKvPy3LLRI4vVlLPXDelroTa5zkWL3LNTC+Niw4Mvac0u3gpqNDknVdKlKrVvhw==
+  dependencies:
+    xxhash-wasm "^1.0.2"
+    xxhashjs "^0.2.2"
+
+"@subsquid/util-xxhash@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@subsquid/util-xxhash/-/util-xxhash-1.2.1.tgz#26445232ad52d348cca47cdfc7b06fc2d14298ef"
+  integrity sha512-wobgbKK0fd+3ufUVjxcx4zaYII9JY7hbIStyO9M9Q5xrdihiWM5APX27sRuoO8X8oSj34v44JpIMxC8Rbpy3xQ==
   dependencies:
     xxhash-wasm "^1.0.2"
     xxhashjs "^0.2.2"

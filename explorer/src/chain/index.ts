@@ -49,7 +49,8 @@ function getChain(): { api: ChainApi; config: ProcessorConfig } {
       // from: 705300
       // from: 761799
       from: 21000
-    }
+    },
+    sourceCodeEnabled: (process.env.SOURCE_CODE_ENABLED || "false") === "true",
   }
 
   if (chainAPI.customConfig) {

@@ -1,18 +1,19 @@
-import { Store } from '@subsquid/typeorm-store'
+import { Entity, Store } from '@subsquid/typeorm-store'
 import { Keyring } from '@polkadot/api'
 import {
   decodeHex,
   toHex,
   CommonHandlerContext,
-  SubstrateBlock
+  SubstrateBlock,
+  SubstrateExtrinsicSignature
 } from '@subsquid/substrate-processor'
 import { chain, BLACKLIST_CONFIG } from '../chain'
-import { CounterLevel, ItemsCounter, ItemType } from '../model'
+import { Account, ActivityType, ContractActivity, CounterLevel, ItemsCounter, ItemType } from '../model'
 import { ProcessorContext } from '../processor'
 
 const keyring = new Keyring()
 
-export function encodeAddress(address: Uint8Array) {
+export function encodeAddress(address: Uint8Array | string) {
   return keyring.encodeAddress(address, chain.config.prefix)
 }
 
@@ -229,4 +230,81 @@ export async function getBalances(
       accountIdsU8
     ))
   )
+}
+
+interface Signature {
+  __kind: string
+  value: string
+}
+
+export function getSignerAddress(
+  signature: SubstrateExtrinsicSignature
+): string {
+  // Disabling linter as address.__kind comes as Id, Index, Address32 or Address20
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { __kind, value } = <Signature>signature.address
+  switch (__kind) {
+    case 'Id':
+    case 'Address32':
+    case 'Address20':
+      return encodeAddress(value)
+    default:
+      throw new Error(`Address of type [${__kind}] not supported`)
+  }
+}
+
+
+export interface ContractInstantiatedArgs {
+  code?: string
+  data?: string
+  salt?: string
+  gasLimit?: bigint
+  value?: bigint
+  codeHash?: string
+}
+
+export interface ContractCodeStoredArgs {
+  data?: string
+  codeHash?: string
+}
+
+export interface ContractCodeUpdatedArgs {
+  data?: string
+  newCodeHash?: string
+  oldCodeHash?: string
+}
+
+export function createActivity(
+  extrinsicEntity: string,
+  id: string,
+  type: ActivityType,
+  to?: Account,
+  createdAt?: Date,
+  from?: Account,
+  args?:
+    | ContractCodeStoredArgs
+    | ContractCodeUpdatedArgs
+    | ContractInstantiatedArgs
+): ContractActivity {
+  return new ContractActivity({
+    id: `${id}-${type}`,
+    type,
+    to,
+    createdAt: createdAt,
+    from,
+    extrinsicHash: extrinsicEntity,
+    args: args
+  })
+}
+
+
+export async function saveAll<E extends Entity | undefined>(
+  store: Store,
+  entities: E[]
+): Promise<void> {
+  for (const entity of entities) {
+    if (entity !== undefined) {
+      await store.save(entity)
+    }
+  }
 }
