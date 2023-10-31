@@ -8,8 +8,10 @@ import {
   SubstrateExtrinsicSignature
 } from '@subsquid/substrate-processor'
 import { chain, BLACKLIST_CONFIG } from '../chain'
-import { Account, ActivityType, ContractActivity, CounterLevel, ItemsCounter, ItemType } from '../model'
+import { Account, ActivityType, ContractActivity, CounterLevel, DecodedActivityArg, DecodedContractActivity, ItemsCounter, ItemType } from '../model'
 import { ProcessorContext } from '../processor'
+import { OptEntity } from '.'
+import { DecodedElement } from '../abi/wasmDecoder/types'
 
 const keyring = new Keyring()
 
@@ -319,6 +321,36 @@ export async function decodeData(
     } catch (error) {
       const { message } = <Error>error
       console.log(message)
+    }
+  }
+}
+
+export function addDecodedActivityEntities({
+  entities,
+  decodedElement,
+  activityEntity
+}: {
+  entities: OptEntity[]
+  decodedElement?: DecodedElement
+  activityEntity: ContractActivity
+}): void {
+  if (decodedElement) {
+    const decodedElementEntity = new DecodedContractActivity({
+      id: activityEntity.id,
+      name: decodedElement.name,
+      activity: activityEntity
+    })
+
+    entities.push(decodedElementEntity)
+
+    for (const arg of decodedElement.args) {
+      entities.push(
+        new DecodedActivityArg({
+          id: `${decodedElementEntity.id}-${arg.name}`,
+          decodedActivity: decodedElementEntity,
+          ...arg
+        })
+      )
     }
   }
 }
