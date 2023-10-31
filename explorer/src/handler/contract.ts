@@ -10,7 +10,7 @@ import {
   UpdateContract,
   CallContract
 } from '../action'
-import { encodeAddress, getSignerAddress } from '../utils'
+import { encodeAddress, getSignerAddress, Args } from '../utils'
 
 export async function process(ctx: any) {
   const actions: Action[] = []
@@ -92,6 +92,7 @@ export async function process(ctx: any) {
               codeHash: data.codeHash,
               owner: owneraddress,
               id: item.event.id,
+              args: <Args>item.event.call.args
             })
           )
           break
@@ -101,7 +102,11 @@ export async function process(ctx: any) {
             chain.api.events.contract.ContractEmitted.decode(ctx, item.event)
 
           const { codeHash } =
-            await chain.api.storages.contract.getContractInfoOfStorage.decode(ctx, header, contract)
+            await chain.api.storages.contract.getContractInfoOfStorage.decode(
+              ctx,
+              header,
+              contract
+            )
 
           actions.push(
             new ContractEmittedContract(header, item.event.extrinsic, {
@@ -131,13 +136,28 @@ export async function process(ctx: any) {
 
           const owneraddress = encodeAddress(owner)
 
+          const { signature } = item.event.extrinsic
+
+          let signer: string = 'undefine'
+          if (signature != null) {
+            signer = getSignerAddress(signature)
+          }
+
           actions.push(
+            new EnsureAccount(header, item.extrinsic, {
+              id: owneraddress
+            }),
+            new EnsureAccount(header, item.extrinsic, {
+              id: signer
+            }),
             new UpdateContract(header, item.event.extrinsic, {
               id: item.event.id,
               contract,
               newCodeHash,
               oldCodeHash,
-              owner: owneraddress
+              owner: owneraddress,
+              args: <Args>item.event.call.args,
+              signer
             })
           )
           break
@@ -165,8 +185,8 @@ export async function process(ctx: any) {
               from,
               contractAddress,
               data
-            }),
-            )
+            })
+          )
           break
         }
       }
