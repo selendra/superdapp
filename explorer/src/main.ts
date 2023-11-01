@@ -4,7 +4,8 @@ import {
   blockHandler,
   balanceHandler,
   evmHandler,
-  ContractHandler
+  ContractHandler,
+  IdentityHandler
 } from './handler'
 
 processor.run(new TypeormDatabase(), async (ctx) => {
@@ -13,6 +14,7 @@ processor.run(new TypeormDatabase(), async (ctx) => {
     await balanceHandler.process(ctx)
     await evmHandler.process(ctx)
     await ContractHandler.process(ctx)
+    await IdentityHandler.process(ctx)
   } catch (error) {
     console.log(error)
   }
