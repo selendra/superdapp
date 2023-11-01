@@ -42,6 +42,9 @@ export class Contract {
   @Column_("jsonb", {transformer: {to: obj => obj.toJSON(), from: obj => new StorageInfo(undefined, marshal.nonNull(obj))}, nullable: false})
   storageInfo!: StorageInfo
 
+  @Column_("text", {nullable: true})
+  salt!: string | undefined | null
+
   @OneToMany_(() => CodeHashChange, e => e.contract)
   codeHashChanges!: CodeHashChange[]
 }

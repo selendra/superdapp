@@ -10,7 +10,7 @@ import {
   UpdateContract,
   CallContract
 } from '../action'
-import { encodeAddress, getSignerAddress, Args } from '../utils'
+import { encodeAddress, getSignerAddress } from '../utils'
 
 export async function process(ctx: any) {
   const actions: Action[] = []
@@ -50,11 +50,12 @@ export async function process(ctx: any) {
             new EnsureAccount(header, item.event.extrinsic, {
               id: data.contract
             }),
-
             new CreateContract(header, item.event.extrinsic, {
+              id: item.event.id,
               contractInfo,
               deployer: data.deployer,
-              contract: data.contract
+              contract: data.contract,
+              args: item.event.call.args
             })
           )
           break
@@ -64,10 +65,29 @@ export async function process(ctx: any) {
             ctx,
             item.event
           )
+
+          const { signature } = item.event.extrinsic
+          let signer: string = 'undefine'
+          if (signature != null) {
+            signer = getSignerAddress(signature)
+          }
           actions.push(
+            new EnsureAccount(header, item.extrinsic, {
+              id: data.beneficiary
+            }),
+            new EnsureAccount(header, item.extrinsic, {
+              id: data.contract
+            }),
+            new EnsureAccount(header, item.extrinsic, {
+              id: signer
+            }),
+
             new TerminatedContract(header, item.event.extrinsic, {
+              id: item.event.id,
               beneficiary: data.beneficiary,
-              contract: data.contract
+              contract: data.contract,
+              signer: signer,
+              args: item.event.call.args
             })
           )
           break
@@ -92,7 +112,7 @@ export async function process(ctx: any) {
               codeHash: data.codeHash,
               owner: owneraddress,
               id: item.event.id,
-              args: <Args>item.event.call.args
+              args: item.event.call.args
             })
           )
           break
@@ -156,7 +176,7 @@ export async function process(ctx: any) {
               newCodeHash,
               oldCodeHash,
               owner: owneraddress,
-              args: <Args>item.event.call.args,
+              args: item.event.call.args,
               signer
             })
           )
