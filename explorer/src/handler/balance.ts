@@ -35,6 +35,124 @@ export async function process(ctx: any) {
           )
           break
         }
+        case 'Balances.BalanceSet': {
+          const { who } = chain.api.events.balances.BalanceSet.decode(
+            ctx,
+            item.event
+          )
+          const fromId = encodeAddress(who)
+
+          actions.push(
+            new EnsureAccount(header, item.event.extrinsic, {
+              id: fromId
+            })
+          )
+          break
+        }
+        case 'Balances.Endowed': {
+          const { account } = chain.api.events.balances.BalancesEndowed.decode(
+            ctx,
+            item.event
+          )
+          const fromId = encodeAddress(account)
+
+          actions.push(
+            new EnsureAccount(header, item.event.extrinsic, {
+              id: fromId
+            })
+          )
+          break
+        }
+        case 'Balances.Deposit': {
+          const { who } = chain.api.events.balances.BalancesDeposit.decode(
+            ctx,
+            item.event
+          )
+          const fromId = encodeAddress(who)
+
+          actions.push(
+            new EnsureAccount(header, item.event.extrinsic, {
+              id: fromId
+            })
+          )
+          break
+        }
+        case 'Balances.Reserved': {
+          const { who } = chain.api.events.balances.BalancesReserved.decode(
+            ctx,
+            item.event
+          )
+          const fromId = encodeAddress(who)
+
+          actions.push(
+            new EnsureAccount(header, item.event.extrinsic, {
+              id: fromId
+            })
+          )
+          break
+        }
+        case 'Balances.Unreserved': {
+          const { who } = chain.api.events.balances.BalancesUnreserved.decode(
+            ctx,
+            item.event
+          )
+          const fromId = encodeAddress(who)
+
+          actions.push(
+            new EnsureAccount(header, item.event.extrinsic, {
+              id: fromId
+            })
+          )
+          break
+        }
+        case 'Balances.Withdraw': {
+          const { who } = chain.api.events.balances.BalancesWithdraw.decode(
+            ctx,
+            item.event
+          )
+          const fromId = encodeAddress(who)
+
+          actions.push(
+            new EnsureAccount(header, item.event.extrinsic, {
+              id: fromId
+            })
+          )
+
+          break
+        }
+        case 'Balances.Slashed': {
+          const { who } = chain.api.events.balances.BalancesSlashed.decode(
+            ctx,
+            item.event
+          )
+          const fromId = encodeAddress(who)
+
+          actions.push(
+            new EnsureAccount(header, item.event.extrinsic, {
+              id: fromId
+            })
+          )
+          break
+        }
+        case 'Balances.ReserveRepatriated': {
+          const { from, to } =
+            chain.api.events.balances.BalancesReserveRepatriated.decode(
+              ctx,
+              item.event
+            )
+          const fromId = encodeAddress(from)
+          const toId = encodeAddress(to)
+
+          actions.push(
+            new EnsureAccount(header, item.event.extrinsic, {
+              id: fromId
+            }),
+            new EnsureAccount(header, item.event.extrinsic, {
+              id: toId
+            })
+          )
+          break
+        }
       }
     }
   }

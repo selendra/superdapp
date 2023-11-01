@@ -13,6 +13,8 @@ import { SubstrateBlock, toHex } from '@subsquid/substrate-processor'
 import {
   ContractCodeStoredArgs,
   ContractCodeUpdatedArgs,
+  ContractInstantiatedArgs,
+  ExtrinsicArg,
   OptEntity,
   addDecodedActivityEntities,
   createActivity,
@@ -48,13 +50,16 @@ export class RemoveContract extends Action<ContractHash> {
 }
 
 interface ContractData {
+  id: string
   contractInfo: any
   deployer: string
   contract: string
+  args: any
 }
 
 export class CreateContract extends Action<ContractData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
+    const entities: OptEntity[] = []
     const contract = await ctx.store.get(Contract, {
       where: { id: this.data.contract }
     })
@@ -86,6 +91,10 @@ export class CreateContract extends Action<ContractData> {
       })
     }
 
+    const args = this.data.args
+      ? <ContractInstantiatedArgs>this.data.args
+      : null
+
     const storageInfo = new StorageInfo({
       storageBaseDeposit: this.data.contractInfo.storageBaseDeposit,
       storageByteDeposit: this.data.contractInfo.storageByteDeposit,
@@ -99,39 +108,119 @@ export class CreateContract extends Action<ContractData> {
       trieId: this.data.contractInfo.trieId,
       contractAccount: contractAccount,
       contractCode: contractCodeEntity,
-      storageInfo
+      storageInfo,
+      salt: args ? args.salt : null
     })
 
-    await ctx.store.save(contractCodeEntity)
-    await ctx.store.save(contractEntity)
+    const allArgs: ContractInstantiatedArgs = args || {}
+    if (allArgs.codeHash === undefined) {
+      allArgs.codeHash = toHex(this.data.contractInfo.codeHash)
+    }
+
+    const activityEntity = createActivity(
+      this.extrinsic.hash,
+      this.data.id,
+      ActivityType.CONTRACT,
+      contractAccount,
+      new Date(this.block.timestamp),
+      deployerAccount,
+      allArgs
+    )
+
+    entities.push(contractEntity, activityEntity)
+
+    const { data } = <ExtrinsicArg>this.data.args
+
+    // Decode data with ABI
+    await decodeData(data, async (rawData: string | Uint8Array | Buffer) => {
+      const decodedElement = await abiDecoder.decodeConstructor({
+        codeHash: toHex(this.data.contractInfo.codeHash),
+        data: rawData
+      })
+
+      addDecodedActivityEntities({
+        entities,
+        decodedElement,
+        activityEntity
+      })
+    })
+    await saveAll(ctx.store, entities)
   }
 }
 
 interface TerminatedContractData {
+  id: string
   beneficiary: string
   contract: string
+  signer: string
+  args: any
 }
 
 export class TerminatedContract extends Action<TerminatedContractData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
-    const contractCodeEntity = await ctx.store.get(Contract, {
+    const entities: OptEntity[] = []
+
+    const contractEntity = await ctx.store.get(Contract, {
       where: { id: this.data.contract },
       relations: {
         contractCode: true
       }
     })
-    if (contractCodeEntity == null) return
+    if (contractEntity == null) return
 
-    await this.updateBalance(ctx, this.data.contract)
-    const beneficiary = await this.updateBalance(ctx, this.data.beneficiary)
+    const contractAccount = await this.updateBalance(ctx, this.data.contract)
+    const beneficiaryAccount = await this.updateBalance(
+      ctx,
+      this.data.beneficiary
+    )
+    const signerAccount = await this.updateBalance(ctx, this.data.signer)
 
-    contractCodeEntity.terminatedAt = new Date(this.block.timestamp)
-    contractCodeEntity.terminatedExtrinsicHash = this.extrinsic?.hash
+    contractEntity.terminatedAt = new Date(this.block.timestamp)
+    contractEntity.terminatedExtrinsicHash = this.extrinsic?.hash
       ? this.extrinsic.hash
       : '0x'
-    contractCodeEntity.terminationBeneficiary = beneficiary
+    contractEntity.terminationBeneficiary = beneficiaryAccount
 
-    await ctx.store.save(contractCodeEntity)
+    const activityEntity = createActivity(
+      this.extrinsic.hash,
+      this.data.id,
+      ActivityType.CONTRACTTERMINATE,
+      contractAccount,
+      new Date(this.block.timestamp),
+      signerAccount
+    )
+
+    entities.push(contractEntity, activityEntity)
+
+    const { data } = <ExtrinsicArg>this.data.args
+
+    // Decode data with ABI
+    await decodeData(data, async (rawData: string | Uint8Array | Buffer) => {
+      // We get the contract code entity from DB instead of on-chain storage
+      // since contract doesn't exist anymore
+      const contractCodeEntity = await ctx.store.get(ContractCode, {
+        where: {
+          contractsDeployed: {
+            id: this.data.contract
+          }
+        }
+      })
+
+      if (contractCodeEntity) {
+        const decodedElement = await abiDecoder.decodeMessage({
+          codeHash: contractCodeEntity.id,
+          data: rawData
+        })
+
+        addDecodedActivityEntities({
+          entities,
+          decodedElement,
+          activityEntity
+        })
+      }
+    })
+
+    await saveAll(ctx.store, entities)
   }
 
   private async updateBalance(ctx: ProcessorContext, address: string) {
@@ -204,6 +293,8 @@ export class CodeStoredContract extends Action<ContractCodeStored> {
       args
     )
 
+    entities.push(activityEntity, contractCodeEntity)
+
     // Decode data with ABI
     await decodeData(
       args.data,
@@ -220,9 +311,6 @@ export class CodeStoredContract extends Action<ContractCodeStored> {
         })
       }
     )
-
-    entities.push(activityEntity, contractCodeEntity)
-
     await saveAll(ctx.store, entities)
   }
 }
