@@ -9,9 +9,6 @@ export class Block {
     Object.assign(this, props)
   }
 
-  /**
-   * BlockHeight-blockHash - e.g. 0001812319-0001c
-   */
   @PrimaryColumn_()
   id!: string
 

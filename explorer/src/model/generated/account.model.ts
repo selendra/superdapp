@@ -1,33 +1,37 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_, OneToOne as OneToOne_} from "typeorm"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, OneToMany as OneToMany_, OneToOne as OneToOne_} from "typeorm"
 import * as marshal from "./marshal"
-import {Transfer} from "./transfer.model"
 import {StakingReward} from "./stakingReward.model"
 import {Identity} from "./identity.model"
 import {IdentitySub} from "./identitySub.model"
 
+@Index_(["freeBalance", "id"], {unique: true})
 @Entity_()
 export class Account {
   constructor(props?: Partial<Account>) {
     Object.assign(this, props)
   }
 
+  /**
+   * Native address
+   */
   @PrimaryColumn_()
   id!: string
 
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  free!: bigint
+  @Index_()
+  @Column_("text", {nullable: true})
+  evmAddress!: string | undefined | null
 
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  reserved!: bigint
+  freeBalance!: bigint
 
   @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  total!: bigint
+  reservedBalance!: bigint
+
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+  totalBalance!: bigint
 
   @Column_("int4", {nullable: true})
   updatedAt!: number | undefined | null
-
-  @OneToMany_(() => Transfer, e => e.account)
-  transfers!: Transfer[]
 
   @OneToMany_(() => StakingReward, e => e.account)
   rewards!: StakingReward[]

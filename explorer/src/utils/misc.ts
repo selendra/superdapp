@@ -1,16 +1,133 @@
+import { Entity, Store } from '@subsquid/typeorm-store'
+import { Keyring } from '@polkadot/api'
 import {
   decodeHex,
   toHex,
+  CommonHandlerContext,
   SubstrateBlock,
-  CommonHandlerContext
+  SubstrateExtrinsicSignature
 } from '@subsquid/substrate-processor'
-import assert from 'assert'
-import { ChainDataName, ParsedEventsDataMap, ParsedChainData } from './types'
-import { BLACKLIST_CONFIG } from '../chains'
-import * as ss58 from '@subsquid/ss58'
-import { Store } from '@subsquid/typeorm-store'
-import { CounterLevel, ItemsCounter, ItemType } from '../model'
-import { Keyring } from '@polkadot/api'
+import { chain, BLACKLIST_CONFIG } from '../chain'
+import { Account, ActivityType, ContractActivity, CounterLevel, DecodedActivityArg, DecodedContractActivity, ItemsCounter, ItemType } from '../model'
+import { ProcessorContext } from '../processor'
+import { OptEntity } from '.'
+import { DecodedElement } from '../abi/wasmDecoder/types'
+
+const keyring = new Keyring()
+
+export function encodeAddress(address: Uint8Array | string) {
+  return keyring.encodeAddress(address, chain.config.prefix)
+}
+
+export function decodeAddress(address: string) {
+  return keyring.decodeAddress(address)
+}
+
+export function getOriginAccountId(origin: any): Uint8Array | undefined {
+  if (
+    origin &&
+    origin.__kind === 'system' &&
+    origin.value.__kind === 'Signed'
+  ) {
+    const id = origin.value.value
+    if (id.__kind === 'Id') {
+      return decodeHex(id.value)
+    } else {
+      return decodeHex(id)
+    }
+  } else {
+    return undefined
+  }
+}
+
+export function toEntityMap<T extends { id: string }>(
+  entities: T[]
+): Map<string, T> {
+  return new Map(entities.map((e) => [e.id, e]))
+}
+
+export function* splitIntoBatches<T>(
+  list: T[],
+  maxBatchSize: number
+): Generator<T[]> {
+  if (list.length <= maxBatchSize) {
+    yield list
+  } else {
+    let offset = 0
+    while (list.length - offset > maxBatchSize) {
+      yield list.slice(offset, offset + maxBatchSize)
+      offset += maxBatchSize
+    }
+    yield list.slice(offset)
+  }
+}
+
+export function unwrapData(data: { __kind: string; value?: Uint8Array }) {
+  switch (data.__kind) {
+    case "None":
+      return null;
+    case "BlakeTwo256":
+    case "Sha256":
+    case "Keccak256":
+    case "ShaThree256":
+      return Buffer.from(data.value!).toString("hex");
+    default:
+      return Buffer.from(data.value!)
+        .toString("utf-8")
+        .replace(/\u0000/g, "");
+  }
+}
+
+function parseArgsHelper(srcNode: any, res: Set<string>): void {
+  if (!srcNode) return
+
+  const handleVertex = (val: any) => {
+    if (ArrayBuffer.isView(val) && val.constructor.name === 'Uint8Array') {
+      const tr = toHex(val as Uint8Array)
+      if (tr.length <= BLACKLIST_CONFIG.argsStringMaxLengthLimit) res.add(tr)
+      return
+    }
+    if (ArrayBuffer.isView(val) && val.constructor.name !== 'Uint8Array') {
+      const tr = val.toString()
+      if (tr.length <= BLACKLIST_CONFIG.argsStringMaxLengthLimit) res.add(tr)
+      return
+    }
+
+    switch (typeof val) {
+      case 'string':
+        if (
+          val.length > 0 &&
+          val.length <= BLACKLIST_CONFIG.argsStringMaxLengthLimit
+        ) {
+          res.add(val)
+        }
+        break
+      case 'number':
+      case 'bigint':
+        res.add((<any>val).toString())
+        break
+    }
+  }
+
+  if (
+    Array.isArray(srcNode) ||
+    (!Array.isArray(srcNode) &&
+      !ArrayBuffer.isView(srcNode) &&
+      typeof srcNode === 'object')
+  ) {
+    // It's array or object
+    for (const key in srcNode) parseArgsHelper(srcNode[key], res)
+  } else {
+    // It's primitive value
+    handleVertex(srcNode)
+  }
+}
+
+export function getParsedArgs(srcArgs: any): string[] {
+  let result: Set<string> = new Set()
+  parseArgsHelper(srcArgs, result)
+  return [...result.values()]
+}
 
 interface ICounterNameProps {
   type: ItemType
@@ -70,165 +187,170 @@ export class ItemsLogger {
   }
 }
 
-export class ParsedChainDataScope {
-  private scope: ParsedEventsDataMap
-
-  constructor() {
-    this.scope = new Map<ChainDataName, Set<ParsedChainData>>()
+export function dataToString(data: unknown): string {
+  if (typeof data === 'string') {
+    return data
   }
-
-  set(section: ChainDataName, value: ParsedChainData) {
-    this.scope.set(section, (this.scope.get(section) || new Set()).add(value))
-  }
-
-  get<T>(section: ChainDataName): Set<T> {
-    return (this.scope.get(section) as Set<T>) || new Set<T>()
-  }
-}
-
-export function encodeAccount(
-  id: Uint8Array | string | null,
-  prefix?: string | number | undefined
-) {
-  assert(id, 'Cannot encode public key with value null.')
-  if (typeof id === 'string' && !!prefix) {
-    return ss58.codec(prefix).encode(decodeHex(id))
-  } else if (typeof id === 'string' && !prefix) {
-    return id
-  } else if (typeof id !== 'string' && !prefix) {
-    return toHex(id)
-  } else if (typeof id !== 'string' && !!prefix) {
-    return ss58.codec(prefix).encode(id)
-  }
-  return id.toString()
-}
-
-export function decodeAccount(
-  id: string,
-  prefix?: string | number | undefined
-) {
-  return prefix != null ? ss58.codec(prefix).decode(id) : decodeHex(id)
-}
-
-function parseArgsHelper(srcNode: any, res: Set<string>): void {
-  if (!srcNode) return
-
-  const handleVertex = (val: any) => {
-    if (ArrayBuffer.isView(val) && val.constructor.name === 'Uint8Array') {
-      const tr = toHex(val as Uint8Array)
-      if (tr.length <= BLACKLIST_CONFIG.argsStringMaxLengthLimit) res.add(tr)
-      return
-    }
-    if (ArrayBuffer.isView(val) && val.constructor.name !== 'Uint8Array') {
-      const tr = val.toString()
-      if (tr.length <= BLACKLIST_CONFIG.argsStringMaxLengthLimit) res.add(tr)
-      return
-    }
-
-    switch (typeof val) {
-      case 'string':
-        if (
-          val.length > 0 &&
-          val.length <= BLACKLIST_CONFIG.argsStringMaxLengthLimit
-        ) {
-          res.add(val)
-        }
-        break
-      case 'number':
-      case 'bigint':
-        res.add((<any>val).toString())
-        break
-    }
-  }
-
   if (
-    Array.isArray(srcNode) ||
-    (!Array.isArray(srcNode) &&
-      !ArrayBuffer.isView(srcNode) &&
-      typeof srcNode === 'object')
+    typeof data === 'bigint' ||
+    typeof data === 'boolean' ||
+    typeof data === 'number'
   ) {
-    // It's array or object
-    for (const key in srcNode) parseArgsHelper(srcNode[key], res)
-  } else {
-    // It's primitive value
-    handleVertex(srcNode)
+    return data.toString()
   }
-}
-
-export function getParsedArgs(srcArgs: any): string[] {
-  let result: Set<string> = new Set()
-  parseArgsHelper(srcArgs, result)
-  return [...result.values()]
-}
-
-
-const keyring = new Keyring()
-
-export const wait = async (ms: number): Promise<number> =>
-  new Promise((resolve) => {
-    return setTimeout(resolve, ms)
-  })
-
-export function getOriginAccountId(origin: any) {
-  if (
-    origin &&
-    origin.__kind === 'system' &&
-    origin.value.__kind === 'Signed'
-  ) {
-    const id = origin.value.value
-    if (id.__kind === 'Id') {
-      return decodeHex(id.value)
-    } else {
-      return decodeHex(id)
-    }
-  } else {
-    return undefined
+  if (Buffer.isBuffer(data)) {
+    return toHex(data)
   }
-}
-
-export function processItem(
-  blocks: any,
-  fn: (block: SubstrateBlock, item: any) => void
-) {
-  for (let block of blocks) {
-    for (let item of block.items) {
-      fn(block.header, item)
-    }
+  if (data === undefined) {
+    return ''
   }
+  throw new Error(
+    `Conversion of arg type [${typeof data}] to string is not supported`
+  )
 }
 
-export function encodeId(id: Uint8Array | string, prefix: string | number) {
-  return keyring.encodeAddress(id, Number(prefix))
+interface BalanceData {
+  free: bigint
+  reserved: bigint
 }
 
-export function decodeId(id: string, prefix: string | number | undefined) {
-  return keyring.decodeAddress(id)
+export async function getBalances(
+  ctx: ProcessorContext,
+  block: SubstrateBlock,
+  id: string
+): Promise<(BalanceData | undefined) | undefined> {
+  const accountIdsU8 = decodeAddress(id)
+  return (
+    (await chain.api.storages.balances.getSystemAccountBalances.decode(
+      ctx,
+      block,
+      accountIdsU8
+    )) ||
+    (await chain.api.storages.balances.getBalancesAccountBalances.decode(
+      ctx,
+      block,
+      accountIdsU8
+    ))
+  )
 }
 
-export class UnknownVersionError extends Error {
-  constructor(name: string) {
-    super(`There is no relevant version for ${name}`)
-  }
+interface Signature {
+  __kind: string
+  value: string
 }
 
-export class DataNotDecodableError extends Error {
-  constructor(name: string, data: any) {
-    super(`Can't decode ${data} of ${name}`)
-  }
-}
-
-export function unwrapData(data: { __kind: string; value?: Uint8Array }) {
-  switch (data.__kind) {
-    case 'None':
-      return null
-    case 'BlakeTwo256':
-    case 'Sha256':
-    case 'Keccak256':
-    case 'ShaThree256':
-      return Buffer.from(data.value!).toString('hex')
+export function getSignerAddress(
+  signature: SubstrateExtrinsicSignature
+): string {
+  // Disabling linter as address.__kind comes as Id, Index, Address32 or Address20
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { __kind, value } = <Signature>signature.address
+  switch (__kind) {
+    case 'Id':
+    case 'Address32':
+    case 'Address20':
+      return encodeAddress(value)
     default:
-      return Buffer.from(data.value!)
-        .toString('utf-8')
-        .replace(/\u0000/g, '')
+      throw new Error(`Address of type [${__kind}] not supported`)
+  }
+}
+
+
+export interface ContractInstantiatedArgs {
+  code?: string
+  data?: string
+  salt?: string
+  gasLimit?: bigint
+  value?: bigint
+  codeHash?: string
+}
+
+export interface ContractCodeStoredArgs {
+  data?: string
+  codeHash?: string
+}
+
+export interface ContractCodeUpdatedArgs {
+  data?: string
+  newCodeHash?: string
+  oldCodeHash?: string
+}
+
+export function createActivity(
+  extrinsicEntity: string,
+  id: string,
+  type: ActivityType,
+  to?: Account,
+  createdAt?: Date,
+  from?: Account,
+  args?:
+    | ContractCodeStoredArgs
+    | ContractCodeUpdatedArgs
+    | ContractInstantiatedArgs
+): ContractActivity {
+  return new ContractActivity({
+    id: `${id}-${type}`,
+    type,
+    to,
+    createdAt: createdAt,
+    from,
+    extrinsicHash: extrinsicEntity,
+    args: args
+  })
+}
+
+
+export async function saveAll<E extends Entity | undefined>(
+  store: Store,
+  entities: E[]
+): Promise<void> {
+  for (const entity of entities) {
+    if (entity !== undefined) {
+      await store.save(entity)
+    }
+  }
+}
+
+export async function decodeData(
+  data: string | Uint8Array | Buffer | undefined,
+  cb: (data: string | Uint8Array | Buffer) => Promise<void>,
+): Promise<void> {
+  if (chain.config.sourceCodeEnabled && data) {
+    try {
+      await cb(data)
+    } catch (error) {
+      const { message } = <Error>error
+      console.log(message)
+    }
+  }
+}
+
+export function addDecodedActivityEntities({
+  entities,
+  decodedElement,
+  activityEntity
+}: {
+  entities: OptEntity[]
+  decodedElement?: DecodedElement
+  activityEntity: ContractActivity
+}): void {
+  if (decodedElement) {
+    const decodedElementEntity = new DecodedContractActivity({
+      id: activityEntity.id,
+      name: decodedElement.name,
+      activity: activityEntity
+    })
+
+    entities.push(decodedElementEntity)
+
+    for (const arg of decodedElement.args) {
+      entities.push(
+        new DecodedActivityArg({
+          id: `${decodedElementEntity.id}-${arg.name}`,
+          decodedActivity: decodedElementEntity,
+          ...arg
+        })
+      )
+    }
   }
 }

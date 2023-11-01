@@ -1,7 +1,6 @@
-##-------------------------Block--------------------------###
+# =============== Block ===================
 
 type Block @entity {
-  "BlockHeight-blockHash - e.g. 0001812319-0001c"
   id: ID!
   height: Int! @index
   hash: String! @index
@@ -65,6 +64,13 @@ type Call @entity @index(fields: ["id","palletName","callName"]) {
   argsStr: [String]
 }
 
+type ItemsCounter @entity {
+  id: ID!
+  type: ItemType! @index
+  level: CounterLevel! @index
+  total: Int! @index
+}
+
 enum CounterLevel {
   Global
   Pallet
@@ -77,36 +83,93 @@ enum ItemType {
   Events
 }
 
-type ItemsCounter @entity {
-  id: ID!
-  type: ItemType! @index
-  level: CounterLevel! @index
-  total: Int! @index
-}
+# =============== Account ===================
 
-###-------------------------Account--------------------------###
-
-type Account @entity {
+type Account @entity @index(fields: ["freeBalance", "id"], unique: true) {
+  "Native address"
   id: ID!
-  free: BigInt!
-  reserved: BigInt!
-  total: BigInt!
+  evmAddress: String @index
+  freeBalance: BigInt! @index
+  reservedBalance: BigInt!
+  totalBalance: BigInt!
   updatedAt: Int
-  transfers: [Transfer!] @derivedFrom(field: "account")
   rewards: [StakingReward!] @derivedFrom(field: "account")
   identity: Identity @derivedFrom(field: "account")
   sub: IdentitySub @derivedFrom(field: "account")
 }
 
-type ChainState @entity {
+type EvmContract @entity {
+  "Address"
   id: ID!
-  tokenBalance: BigInt!
-  tokenHolders: Int!
-  timestamp: DateTime! @index
-  blockNumber: Int! @index
+  extrinsicHash: String!
+  account: String!
+  bytecode: String!
+  bytecodeContext: String!
+  bytecodeArguments: String!
+  type: String! @index
+  timestamp: Int
 }
 
-###-------------------------Staking Reward--------------------------###
+# =============== Contract verification ===================
+
+type VerifiedContract @entity @index(fields: ["contract", "type"], unique: true) @index(fields: ["contract", "id"], unique: true) {
+  "Address"
+  id: ID!
+  contract: EvmContract!
+  name: String! @index
+  filename: String @index
+  source: JSON!
+  optimization: Boolean!
+  compilerVersion: String!
+  compiledData: JSON!
+  args: JSON!
+  runs: Int!
+  target: String!
+  type: String! @index
+  contractData: JSON
+  license: String
+  timestamp: DateTime @index
+}
+
+# =============== Transfer ===================
+
+# entity for linking account and transfer
+type Transfer @entity {
+    id: ID!
+    transfer: TokenTransfer
+    account: Account!
+    denom: String @index
+    direction: TransferDirection
+}
+
+type TokenTransfer @entity {
+    id: ID!
+    blockNumber: Int! @index
+    timestamp: DateTime! @index
+    extrinsicHash: String!
+    from: Account!
+    to: Account!
+    amount: BigInt! @index
+    type: TransferType!
+    success: Boolean!
+}
+
+enum TransferType {
+  Native, 
+  ERC20, 
+  ERC721, 
+  ERC1155,
+  SRC20, 
+  SRC721, 
+  SRC1155
+}
+
+enum TransferDirection {
+    From
+    To
+}
+
+# =============== Staking ===================
 
 type StakingReward @entity {
     id: ID!
@@ -119,47 +182,11 @@ type StakingReward @entity {
     validatorId: ID
 }
 
-###-------------------------Transfer--------------------------###
-
-enum TransferDirection {
-    From
-    To
-}
-
-# entity for linking account and transfer
-type Transfer @entity {
-    id: ID!
-    transfer: NativeTransfer
-    account: Account!
-    direction: TransferDirection
-}
-
-type NativeTransfer @entity {
-    id: ID!
-    blockNumber: Int! @index
-    timestamp: DateTime! @index
-    extrinsicHash: String @index
-    from: Account!
-    to: Account!
-    amount: BigInt! @index
-    success: Boolean!
-}
-
-###-------------------------Identity--------------------------###
+# =============== Identity ===================
 
 type IdentityAdditionalField {
     name: String
     value: String
-}
-
-enum Judgement {
-    Unknown
-    FeePaid
-    Reasonable
-    KnownGood
-    OutOfDate
-    LowQuality
-    Erroneous
 }
 
 type Identity @entity {
@@ -185,3 +212,122 @@ type IdentitySub @entity {
     account: Account! @unique
     name: String
 }
+
+enum Judgement {
+    Unknown
+    FeePaid
+    Reasonable
+    KnownGood
+    OutOfDate
+    LowQuality
+    Erroneous
+}
+
+# =============== Contract ===================
+
+type Contract @entity {
+  "Contract address"
+  id: ID!
+  trieId: Bytes!
+  contractAccount: Account! @unique
+  contractCode: ContractCode!
+  terminatedAt: DateTime
+  terminatedExtrinsicHash: String
+  terminationBeneficiary: Account
+  storageInfo: StorageInfo!
+  salt: String
+  codeHashChanges: [CodeHashChange!] @derivedFrom(field: "contract")
+}
+
+type CodeHashChange @entity {
+  id: ID!
+  contract: Contract!
+  newCodeHash: String!
+  oldCodeHash: String!
+  changedAt: DateTime!
+  extrinsicHash: String!
+}
+
+type ContractCode @entity {
+  "Code Hash"
+  id: ID!
+  owner: Account!
+  createdAt: DateTime!
+  createdExtrinsicHash: String!
+  removedAt: DateTime
+  removedExtrinsicHash: String
+  contractsDeployed: [Contract!] @derivedFrom(field: "contractCode")
+}
+
+type ContractEvent @entity {
+  "Event ID"
+  id: ID!
+  blockNumber: Int!
+  indexInBlock: Int!
+  contractAddress: String!
+  data: Bytes!
+  createdAt: DateTime!
+  extrinsicHash: String!
+  decodedEvent: DecodedContractEvent @derivedFrom(field: "contractEvent")
+}
+
+type DecodedEventArg @entity {
+  id: ID!
+  decodedEvent: DecodedContractEvent!
+  name: String!
+  value: String!
+  type: String!
+  displayName: String
+}
+
+type DecodedContractActivity @entity {
+  id: ID!
+  name: String! @index
+  activity: ContractActivity! @unique
+  args: [DecodedActivityArg!] @derivedFrom(field: "decodedActivity")
+}
+
+type DecodedActivityArg @entity {
+  id: ID!
+  decodedActivity: DecodedContractActivity!
+  name: String!
+  value: String!
+  type: String!
+  displayName: String
+}
+
+type DecodedContractEvent @entity {
+  id: ID!
+  name: String! @index
+  contractEvent: ContractEvent! @unique
+  args: [DecodedEventArg!] @derivedFrom(field: "decodedEvent")
+}
+
+type ContractActivity @entity{
+  id: ID!
+  type: ActivityType! @index
+  to: Account
+  from: Account
+  createdAt: DateTime! @index
+  args: JSON
+  extrinsicHash: String!
+  decodedActivity: DecodedContractActivity @derivedFrom(field: "activity")
+}
+
+enum ActivityType {
+  CONTRACT
+  CONTRACTCALL
+  CODESTORED
+  CODEUPDATE
+  CONTRACTTERMINATE
+}
+
+type StorageInfo {
+  storageBytes: Int
+  storageItems: Int
+  storageByteDeposit: BigInt
+  storageItemDeposit: BigInt
+  storageBaseDeposit: BigInt
+}
+
+# ===============  ===================

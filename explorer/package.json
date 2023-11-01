@@ -1,5 +1,5 @@
 {
-  "name": "kusama-transfers",
+  "name": "selendra-explorer",
   "private": true,
   "engines": {
     "node": ">=16"
@@ -13,17 +13,25 @@
     "query-node:start": "squid-graphql-server --subscriptions --max-response-size 10000 --dumb-cache in-memory --dumb-cache-ttl 1000 --dumb-cache-size 100 --dumb-cache-max-age 1000"
   },
   "dependencies": {
-    "@belopash/squid-tools": "^0.4.0",
-    "@polkadot/api": "^10.9.1",
+    "@polkadot/api": "^10.10.1",
+    "@polkadot/api-contract": "^10.10.1",
     "@subsquid/archive-registry": "^3.1.0",
+    "@subsquid/evm-typegen": "^3.2.2",
     "@subsquid/graphql-server": "^3.3.2",
+    "@subsquid/ink-abi": "^3.0.1",
     "@subsquid/processor-tools": "github:subsquid/typeorm-cache-store",
     "@subsquid/ss58": "^0.1.4",
     "@subsquid/substrate-processor": "^2.4.1",
+    "@subsquid/substrate-runtime": "^1.0.1",
     "@subsquid/typeorm-migration": "^0.1.6",
     "@subsquid/typeorm-store": "^0.2.2",
+    "@types/node-fetch": "^2.6.7",
     "concurrently": "^7.5.0",
     "dotenv": "^16.0.0",
+    "ether": "^0.0.9",
+    "ethers": "^6.8.0",
+    "evm": "^0.2.0",
+    "lru-cache": "^7.14.1",
     "node-ipc": "^11.1.0",
     "pg": "8.9.0",
     "type-graphql": "^1.1.1",

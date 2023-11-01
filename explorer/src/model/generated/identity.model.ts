@@ -26,7 +26,7 @@ export class Identity {
   subs!: IdentitySub[]
 
   @Column_("jsonb", {transformer: {to: obj => obj == null ? undefined : obj.map((val: any) => val.toJSON()), from: obj => obj == null ? undefined : marshal.fromList(obj, val => new IdentityAdditionalField(undefined, marshal.nonNull(val)))}, nullable: true})
-  additional!: IdentityAdditionalField[] | undefined | null
+  additional!: (IdentityAdditionalField)[] | undefined | null
 
   @Column_("text", {nullable: true})
   display!: string | undefined | null
