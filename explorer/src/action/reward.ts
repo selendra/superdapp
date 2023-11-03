@@ -12,7 +12,7 @@ export interface RewardData {
 
 export class RewardAction extends Action<RewardData> {
   protected async _perform(ctx: ProcessorContext): Promise<void> {
-    let account = await ctx.store.findOneOrFail(Account, {
+    let account = await ctx.store.get(Account, {
       where: { id: this.data.accountId },
     });
 
