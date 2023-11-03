@@ -1,4 +1,4 @@
-import { encodeAddress } from '../utils'
+import { encodeAddress, getOriginAccountId } from '../utils'
 import { chain } from '../chain'
 import { Action } from '../action/base'
 import { EnsureAccount, TransferAction } from '../action'
@@ -8,6 +8,19 @@ export async function process(ctx: any) {
 
   for (const { items, header } of ctx.blocks) {
     for (const item of items as any) {
+      if (item.kind === 'call') {
+        const signer = getOriginAccountId(item.call.origin)
+        const address = signer ? encodeAddress(signer) : undefined
+
+        if (address == undefined) return
+        
+        actions.push(
+          new EnsureAccount(header, item.event.extrinsic, {
+            id: address
+          }),
+        )
+      }
+
       switch (item.name) {
         case 'Balances.Transfer': {
           const data = chain.api.events.balances.Transfer.decode(
