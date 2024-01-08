@@ -22,7 +22,15 @@ npm i -g @subsquid/cli@latest
 
 ```
 sqd up  // start database use 'sqd down' to stop
+
 sqd build  // Build the squid project
+sqd codegen // Generate model
+
 sqd migration:apply  //migration:apply
+sqd process // tart the squid processor
+
+sqd serve // Start the GraphQL API server
 
 ```
+
+- get into GraphQL API server http://localhost:4350/graphql
