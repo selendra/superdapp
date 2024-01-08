@@ -235,7 +235,6 @@ type Contract @entity {
   terminatedExtrinsicHash: String
   terminationBeneficiary: Account
   storageInfo: StorageInfo!
-  salt: String
   codeHashChanges: [CodeHashChange!] @derivedFrom(field: "contract")
 }
 

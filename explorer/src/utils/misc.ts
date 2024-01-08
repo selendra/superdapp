@@ -259,7 +259,6 @@ export function getSignerAddress(
 export interface ContractInstantiatedArgs {
   code?: string
   data?: string
-  salt?: string
   gasLimit?: bigint
   value?: bigint
   codeHash?: string
