@@ -109,7 +109,6 @@ export class CreateContract extends Action<ContractData> {
       contractAccount: contractAccount,
       contractCode: contractCodeEntity,
       storageInfo,
-      salt: args ? args.salt : null
     })
 
     const allArgs: ContractInstantiatedArgs = args || {}
