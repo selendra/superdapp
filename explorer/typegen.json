@@ -1,6 +1,6 @@
 {
   "outDir": "src/types",
-  "specVersions": "https://archive-graphql.selendra.org/graphql",
+  "specVersions": "./selendraVersions.jsonl",
   "pallets": {
     "Balances": {
       "events": [

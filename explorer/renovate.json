@@ -22,7 +22,6 @@
       "enabled": false
     }
   ],
-  // "automerge": true,
   "automergeType": "pr",
   "automergeStrategy": "squash",
   "ignoreTests": true
