@@ -1,7 +1,6 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_} from "typeorm"
-import {TokenTransfer} from "./tokenTransfer.model"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, ManyToOne as ManyToOne_} from "typeorm"
+import * as marshal from "./marshal"
 import {Account} from "./account.model"
-import {TransferDirection} from "./_transferDirection"
 
 @Entity_()
 export class Transfer {
@@ -13,17 +12,29 @@ export class Transfer {
   id!: string
 
   @Index_()
-  @ManyToOne_(() => TokenTransfer, {nullable: true})
-  transfer!: TokenTransfer | undefined | null
+  @Column_("int4", {nullable: false})
+  blockNumber!: number
 
   @Index_()
-  @ManyToOne_(() => Account, {nullable: true})
-  account!: Account
+  @Column_("timestamp with time zone", {nullable: false})
+  timestamp!: Date
 
   @Index_()
   @Column_("text", {nullable: true})
-  denom!: string | undefined | null
+  extrinsicHash!: string | undefined | null
 
-  @Column_("varchar", {length: 4, nullable: true})
-  direction!: TransferDirection | undefined | null
+  @Index_()
+  @ManyToOne_(() => Account, {nullable: true})
+  from!: Account
+
+  @Index_()
+  @ManyToOne_(() => Account, {nullable: true})
+  to!: Account
+
+  @Index_()
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+  amount!: bigint
+
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+  fee!: bigint
 }

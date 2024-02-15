@@ -1,36 +1,53 @@
+import {assertNotNull} from '@subsquid/util-internal'
+import {lookupArchive} from '@subsquid/archive-registry'
 import {
-  BatchContext,
-  BatchProcessorCallItem,
-  BatchProcessorItem,
-  SubstrateBatchProcessor,
-} from "@subsquid/substrate-processor";
-import { chain } from "./chain";
-import { Store } from "@subsquid/typeorm-store";
-import * as erc20 from './abi/erc20';
-import * as erc721 from './abi/erc721';
-import * as erc1155 from './abi/erc1155';
+    BlockHeader,
+    DataHandlerContext,
+    SubstrateBatchProcessor,
+    SubstrateBatchProcessorFields,
+    Event as _Event,
+    Call as _Call,
+    Extrinsic as _Extrinsic
+} from '@subsquid/substrate-processor'
+
+import {events} from './types'
 
 export const processor = new SubstrateBatchProcessor()
-  .setDataSource(chain.config.dataSource)
-  .addEvent("*")
-  .addCall("*")
-  .addEvmLog("*", {
-    filter: [
-      [
-        erc20.events.Transfer.topic,
-        erc721.events.Transfer.topic,
-        erc1155.events.TransferBatch.topic,
-        erc1155.events.TransferSingle.topic,
-        erc1155.events.URI.topic
-      ]
-    ],
-  })
-  .includeAllBlocks()
+    .setDataSource({
+        // Lookup archive by the network name in Subsquid registry
+        // See https://docs.subsquid.io/substrate-indexing/supported-networks/
+        archive: lookupArchive('kusama', {release: 'ArrowSquid'}),
+        // Chain RPC endpoint is required on Substrate for metadata and real-time updates
+        chain: {
+            // Set via .env for local runs or via secrets when deploying to Subsquid Cloud
+            // https://docs.subsquid.io/deploy-squid/env-variables/
+            url: assertNotNull(process.env.RPC_ENDPOINT),
+            // More RPC connection options at https://docs.subsquid.io/substrate-indexing/setup/general/#set-data-source
+            rateLimit: 10
+        }
+    })
+    .addEvent({
+        name: [events.balances.transfer.name],
+        extrinsic: true
+    })
+    .setFields({
+        event: {
+            args: true
+        },
+        extrinsic: {
+            hash: true,
+            fee: true
+        },
+        block: {
+            timestamp: true
+        }
+    })
+    // Uncomment to disable RPC ingestion and drastically reduce no of RPC calls
+    //.useArchiveOnly()
 
-if (chain.config.blockRange) processor.setBlockRange(chain.config.blockRange);
-if (chain.config.typesBundle)
-  processor.setTypesBundle(chain.config.typesBundle);
-
-export type CallItem = BatchProcessorCallItem<typeof processor>
-export type Item = BatchProcessorItem<typeof processor>;
-export type ProcessorContext = BatchContext<Store, Item>;
+export type Fields = SubstrateBatchProcessorFields<typeof processor>
+export type Block = BlockHeader<Fields>
+export type Event = _Event<Fields>
+export type Call = _Call<Fields>
+export type Extrinsic = _Extrinsic<Fields>
+export type ProcessorContext<Store> = DataHandlerContext<Store, Fields>

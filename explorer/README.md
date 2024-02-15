@@ -1,1 +1,1 @@
-# Multichain Giant Squid Explorer
+# Selendra Explorer
