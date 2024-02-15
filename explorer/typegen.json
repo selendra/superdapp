@@ -1,6 +1,6 @@
 {
   "outDir": "src/types",
-  "specVersions": "https://v2.archive.subsquid.io/metadata/kusama",
+  "specVersions": "https://archive-graphql.selendra.org/graphql",
   "pallets": {
     "Balances": {
       "events": [
