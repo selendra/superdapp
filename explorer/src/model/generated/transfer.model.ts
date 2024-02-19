@@ -22,7 +22,11 @@ export class Transfer {
 
   @Index_()
   @Column_("text", {nullable: true})
-  denom!: string | undefined | null
+  name!: string | undefined | null
+
+  @Index_()
+  @Column_("text", {nullable: true})
+  symbol!: string | undefined | null
 
   @Column_("varchar", {length: 4, nullable: true})
   direction!: TransferDirection | undefined | null
