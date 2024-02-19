@@ -25,7 +25,7 @@ export class TransferAction extends Action<TransferData> {
       id: this.data.id,
       blockNumber: this.block.height,
       timestamp: new Date(this.block.timestamp),
-      extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash: '0x',
+      extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash : '0x',
       from,
       to,
       amount: this.data.amount,
@@ -39,16 +39,18 @@ export class TransferAction extends Action<TransferData> {
       id: transfer.id + "-from",
       transfer,
       account: from,
-      denom: chain.config.symbols,
+      name: chain.config.chainName,
+      symbol: chain.config.symbols,
       direction: TransferDirection.From,
-      
+
     });
 
     let transferTo = new Transfer({
       id: transfer.id + "-to",
       transfer,
       account: to,
-      denom: chain.config.symbols,
+      name: chain.config.chainName,
+      symbol: chain.config.symbols,
       direction: TransferDirection.To,
     });
     await ctx.store.insert([transferFrom, transferTo]);
