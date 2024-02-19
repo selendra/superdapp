@@ -2,7 +2,7 @@ import type { SubstrateBatchProcessor } from '@subsquid/substrate-processor'
 
 import type selendra from './selendra/api'
 
-export interface IBlackListConfing {
+export interface IBlackListConfig {
   blacklistItems: string[]
   argsStringMaxLengthLimit: number
 }

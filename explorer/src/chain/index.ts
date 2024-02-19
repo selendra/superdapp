@@ -3,7 +3,7 @@ import {
   ProcessorConfig,
   ChainApi,
   IChainData,
-  IBlackListConfing
+  IBlackListConfig
 } from './interfaces'
 import fs from 'fs'
 
@@ -40,6 +40,7 @@ function getChain(): { api: ChainApi; config: ProcessorConfig } {
 
   let processorConfig: ProcessorConfig = {
     chainName: chainConfig.network,
+    symbols: chainConfig.symbols[0],
     dataSource: {
       archive: 'https://archive-graphql.selendra.org/graphql',
       chain: 'wss://rpc1.selendra.org'
@@ -60,7 +61,7 @@ function getChain(): { api: ChainApi; config: ProcessorConfig } {
   return { api: chainAPI.api, config: processorConfig }
 }
 
-export const BLACKLIST_CONFIG: IBlackListConfing = getJSON(
+export const BLACKLIST_CONFIG: IBlackListConfig = getJSON(
   'assets/blacklist-config.json'
 )
 

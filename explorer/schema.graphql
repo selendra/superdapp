@@ -138,7 +138,8 @@ type Transfer @entity {
     id: ID!
     transfer: TokenTransfer
     account: Account!
-    denom: String @index
+    name: String @index
+    symbol: String @index
     direction: TransferDirection
 }
 

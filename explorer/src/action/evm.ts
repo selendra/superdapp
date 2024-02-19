@@ -94,7 +94,7 @@ export class evmContractErc20 extends Action<ContractData> {
         value: amount
       } = erc20.events.Transfer.decode(this.data.item.event.args.log)
       const address: string = this.data.item.event.args.log.address
-      const { name } = await getTokenDetails({
+      const { name, symbol } = await getTokenDetails({
         contractAddress: address,
         contractStandard: 'ERC20',
         ctx,
@@ -122,7 +122,8 @@ export class evmContractErc20 extends Action<ContractData> {
         id: transfer.id + '-from',
         transfer,
         account: fromAccount,
-        denom: name,
+        name,
+        symbol,
         direction: TransferDirection.From
       })
 
@@ -130,7 +131,8 @@ export class evmContractErc20 extends Action<ContractData> {
         id: transfer.id + '-to',
         transfer,
         account: toAccount,
-        denom: name,
+        name,
+        symbol,
         direction: TransferDirection.To
       })
       await ctx.store.insert([transferFrom, transferTo])
