@@ -136,20 +136,13 @@ type VerifiedContract @entity @index(fields: ["contract", "type"], unique: true)
 # entity for linking account and transfer
 type Transfer @entity {
     id: ID!
-    transfer: TokenTransfer
-    account: Account!
     name: String @index
     symbol: String @index
-    direction: TransferDirection
-}
-
-type TokenTransfer @entity {
-    id: ID!
+    from: Account!
+    to: Account!
     blockNumber: Int! @index
     timestamp: DateTime! @index
     extrinsicHash: String!
-    from: Account!
-    to: Account!
     amount: BigInt! @index
     type: TransferType!
     success: Boolean!
@@ -163,11 +156,6 @@ enum TransferType {
   SRC20, 
   SRC721, 
   SRC1155
-}
-
-enum TransferDirection {
-    From
-    To
 }
 
 # =============== Staking ===================
