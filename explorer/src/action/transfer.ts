@@ -1,5 +1,5 @@
 import { chain } from "../chain";
-import { Account, TokenTransfer, Transfer, TransferDirection, Extrinsic, TransferType } from "../model";
+import { Account, Transfer, Extrinsic, TransferType } from "../model";
 import { ProcessorContext } from "../processor";
 import { Action } from "./base";
 
@@ -21,38 +21,19 @@ export class TransferAction extends Action<TransferData> {
       where: { id: this.data.toId },
     });
 
-    let transfer = new TokenTransfer({
+    let transfer = new Transfer({
       id: this.data.id,
       blockNumber: this.block.height,
       timestamp: new Date(this.block.timestamp),
       extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash : '0x',
-      from,
-      to,
       amount: this.data.amount,
       success: this.data.success,
-      type: TransferType.Native
+      type: TransferType.Native,
+      from, to,
+      name: chain.config.chainName,
+      symbol: chain.config.symbols,
     });
 
     await ctx.store.insert(transfer);
-
-    let transferFrom = new Transfer({
-      id: transfer.id + "-from",
-      transfer,
-      account: from,
-      name: chain.config.chainName,
-      symbol: chain.config.symbols,
-      direction: TransferDirection.From,
-
-    });
-
-    let transferTo = new Transfer({
-      id: transfer.id + "-to",
-      transfer,
-      account: to,
-      name: chain.config.chainName,
-      symbol: chain.config.symbols,
-      direction: TransferDirection.To,
-    });
-    await ctx.store.insert([transferFrom, transferTo]);
   }
 }

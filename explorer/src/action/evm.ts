@@ -3,9 +3,7 @@ import { evmToAddress } from '@polkadot/util-crypto'
 import {
   Account,
   EvmContract,
-  TokenTransfer,
   Transfer,
-  TransferDirection,
   TransferType
 } from '../model'
 import { CONTRACT_METHODS, ContractType, getTokenDetails } from '../utils'
@@ -34,7 +32,7 @@ export class EnsureEvmContract extends Action<ContractData> {
     const bytecode = this.data.item.event.call.args.transaction.value.input
     if (!this.isContractCreationInput(bytecode)) return
 
-    const contratcType = this.getContractTypeFromRaw(bytecode)
+    const contractType = this.getContractTypeFromRaw(bytecode)
     const { context, args } = this.preprocessBytecode(bytecode)
 
     contract = new EvmContract({
@@ -45,7 +43,7 @@ export class EnsureEvmContract extends Action<ContractData> {
       bytecodeContext: context,
       bytecodeArguments: args,
       timestamp: this.block.height,
-      type: contratcType
+      type: contractType
     })
 
     await ctx.store.save(contract)
@@ -104,7 +102,7 @@ export class evmContractErc20 extends Action<ContractData> {
       const fromAccount = await this.exitOrNot(ctx, from)
       const toAccount = await this.exitOrNot(ctx, to)
 
-      let transfer = new TokenTransfer({
+      let transfer = new Transfer({
         id: this.data.item.event.evmTxHash,
         blockNumber: this.block.height,
         timestamp: new Date(this.block.timestamp),
@@ -113,29 +111,12 @@ export class evmContractErc20 extends Action<ContractData> {
         to: toAccount,
         amount: amount,
         success: this.data.item.event.call.success,
-        type: TransferType.ERC20
+        type: TransferType.ERC20,
+        name,
+        symbol,
       })
 
       await ctx.store.insert(transfer)
-
-      let transferFrom = new Transfer({
-        id: transfer.id + '-from',
-        transfer,
-        account: fromAccount,
-        name,
-        symbol,
-        direction: TransferDirection.From
-      })
-
-      let transferTo = new Transfer({
-        id: transfer.id + '-to',
-        transfer,
-        account: toAccount,
-        name,
-        symbol,
-        direction: TransferDirection.To
-      })
-      await ctx.store.insert([transferFrom, transferTo])
     } catch (error) {
       console.log(error)
       return
