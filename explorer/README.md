@@ -26,6 +26,7 @@ sqd up  // start database use 'sqd down' to stop
 sqd build  // Build the squid project
 sqd codegen // Generate model
 
+sqd migration:generate 
 sqd migration:apply  //migration:apply
 sqd process // tart the squid processor
 
