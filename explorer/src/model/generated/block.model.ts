@@ -16,10 +16,6 @@ export class Block {
   @Column_("int4", {nullable: false})
   height!: number
 
-  @Index_()
-  @Column_("text", {nullable: false})
-  hash!: string
-
   @Column_("text", {nullable: false})
   parentHash!: string
 

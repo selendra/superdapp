@@ -17,9 +17,8 @@ export async function process(ctx: any) {
     await ItemsLogger.init({ block: ctx.blocks[0] as any, ...ctx })
   for (let block of ctx.blocks) {
     const currentBlock = new BlockEntity({
-      id: block.header.id,
+      id: block.header.hash,
       height: block.header.height,
-      hash: block.header.hash,
       parentHash: block.header.parentHash,
       timestamp: new Date(block.header.timestamp),
       specVersion: Number(block.header.specId.split('@')[1]),

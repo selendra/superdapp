@@ -3,7 +3,6 @@
 type Block @entity {
   id: ID!
   height: Int! @index
-  hash: String! @index
   parentHash: String!
   timestamp: DateTime! @index
   specVersion: Int! @index
