@@ -34,11 +34,18 @@ export class EnsureEvmContract extends Action<ContractData> {
 
     const contractType = this.getContractTypeFromRaw(bytecode)
     const { context, args } = this.preprocessBytecode(bytecode)
-
+    const { name, symbol } = await getTokenDetails({
+      contractAddress: contractId,
+      contractStandard: 'ERC20',
+      block: this.block.height,
+      ctx,
+    })
     contract = new EvmContract({
       id: contractId,
       extrinsicHash: this.extrinsic?.hash ? this.extrinsic.hash : '0x',
       account: signer,
+      name,
+      symbol,
       bytecode,
       bytecodeContext: context,
       bytecodeArguments: args,

@@ -101,6 +101,8 @@ type Account @entity @index(fields: ["freeBalance", "id"], unique: true) {
 type EvmContract @entity {
   "Address"
   id: ID!
+  name: String
+  symbol: String
   extrinsicHash: String!
   account: String!
   bytecode: String!
@@ -225,6 +227,10 @@ type Contract @entity {
   terminationBeneficiary: Account
   storageInfo: StorageInfo!
   codeHashChanges: [CodeHashChange!] @derivedFrom(field: "contract")
+  "TODO"
+  name: String
+  "TODO"
+  symbol: String
 }
 
 type CodeHashChange @entity {
