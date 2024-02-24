@@ -44,4 +44,16 @@ export class Contract {
 
   @OneToMany_(() => CodeHashChange, e => e.contract)
   codeHashChanges!: CodeHashChange[]
+
+  /**
+   * TODO
+   */
+  @Column_("text", {nullable: true})
+  name!: string | undefined | null
+
+  /**
+   * TODO
+   */
+  @Column_("text", {nullable: true})
+  symbol!: string | undefined | null
 }

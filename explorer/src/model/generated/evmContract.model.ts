@@ -12,6 +12,12 @@ export class EvmContract {
   @PrimaryColumn_()
   id!: string
 
+  @Column_("text", {nullable: true})
+  name!: string | undefined | null
+
+  @Column_("text", {nullable: true})
+  symbol!: string | undefined | null
+
   @Column_("text", {nullable: false})
   extrinsicHash!: string
 
