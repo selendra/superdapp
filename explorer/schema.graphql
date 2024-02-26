@@ -141,6 +141,8 @@ type Transfer @entity {
     symbol: String @index
     from: Account!
     to: Account!
+    "null for native tx"
+    contract: String @index
     blockNumber: Int! @index
     timestamp: DateTime! @index
     extrinsicHash: String!
