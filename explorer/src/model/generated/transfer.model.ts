@@ -28,6 +28,13 @@ export class Transfer {
   @ManyToOne_(() => Account, {nullable: true})
   to!: Account
 
+  /**
+   * null for native tx
+   */
+  @Index_()
+  @Column_("text", {nullable: true})
+  contract!: string | undefined | null
+
   @Index_()
   @Column_("int4", {nullable: false})
   blockNumber!: number

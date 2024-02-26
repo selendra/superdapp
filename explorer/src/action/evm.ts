@@ -108,7 +108,6 @@ export class evmContractErc20 extends Action<ContractData> {
 
       const fromAccount = await this.exitOrNot(ctx, from)
       const toAccount = await this.exitOrNot(ctx, to)
-
       let transfer = new Transfer({
         id: this.data.item.event.evmTxHash,
         blockNumber: this.block.height,
@@ -121,6 +120,7 @@ export class evmContractErc20 extends Action<ContractData> {
         type: TransferType.ERC20,
         name,
         symbol,
+        contract: address,
       })
 
       await ctx.store.insert(transfer)
