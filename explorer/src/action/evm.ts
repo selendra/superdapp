@@ -50,7 +50,7 @@ export class EnsureEvmContract extends Action<ContractData> {
       bytecodeContext: context,
       bytecodeArguments: args,
       timestamp: this.block.height,
-      type: contractType
+      type: (contractType == 'bare' || contractType == 'basic') ? 'unknown' : contractType
     })
 
     await ctx.store.save(contract)
@@ -82,11 +82,10 @@ export class EnsureEvmContract extends Action<ContractData> {
       })
     })
 
-    if (!found) {
-      return 'unknown'
-    }
-
-    return found[0] as ContractType
+    return found ? found[0] as ContractType : (
+      txInput.includes("06fdde03") ?
+        (txInput.includes("95d89b41") ? 'basic' : 'bare') : 'unknown'
+    )
   }
 }
 

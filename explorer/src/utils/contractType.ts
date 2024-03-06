@@ -4,8 +4,9 @@ import { Contract as Erc721Contract } from '../abi/erc721'
 import { ProcessorContext } from '../processor'
 import { addTimeout } from '@subsquid/util-timeout';
 import { contractCallTimeout } from '../chain';
+import { ContractBase, Func } from '../abi/abi.support';
 
-export type ContractType = 'ERC20' | 'ERC721' | 'ERC1155' | 'unknown';
+export type ContractType = 'ERC20' | 'ERC721' | 'ERC1155' | 'basic' | 'bare' | 'unknown';
 
 export type TokenDetails = {
   name: string | null;
@@ -107,6 +108,38 @@ function getDecoratedCallResult(rawValue: string | null): string | null {
   return decoratedValue ? clearNullBytes(decoratedValue) : decoratedValue;
 }
 
+import * as ethers from 'ethers'
+export const abi = new ethers.Interface([
+  "function name() external view returns (string memory)",
+  "function symbol() external view returns (string memory)"
+]);
+
+export const functions = {
+  name: new Func<[], {}, string>(
+    abi, '0x06fdde03'
+  ),
+  symbol: new Func<[], {}, string>(
+    abi, '0x95d89b41'
+  ),
+}
+
+export class BasicContract extends ContractBase {
+  name(): Promise<string> {
+    return this.eth_call(functions.name, [])
+  }
+
+  symbol(): Promise<string> {
+    return this.eth_call(functions.symbol, [])
+  }
+}
+
+export class BareContract extends ContractBase {
+  name(): Promise<string> {
+    return this.eth_call(functions.name, [])
+  }
+}
+
+
 
 export async function getTokenDetails({
   tokenId = null,
@@ -130,7 +163,7 @@ export async function getTokenDetails({
         block
       );
       break;
-    case 'ERC721' :
+    case 'ERC721':
       contractInst = getContractErc721(
         ctx,
         contractAddress,
@@ -143,6 +176,18 @@ export async function getTokenDetails({
         contractAddress,
         block
       );
+      break;
+    case 'basic':
+      contractInst = new BasicContract(
+        { _chain: ctx._chain, block: { height: block } },
+        contractAddress
+      )
+      break;
+    case 'bare':
+      contractInst = new BareContract(
+        { _chain: ctx._chain, block: { height: block } },
+        contractAddress
+      )
       break;
     default:
   }
